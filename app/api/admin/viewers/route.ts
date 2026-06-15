@@ -27,41 +27,33 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServerClient();
 
-    // 전체 등록자 + watch_logs LEFT JOIN
-    let query = supabase
+    // 등록자 전체 조회
+    let registrantsQuery = supabase
       .from("registrants")
-      .select(
-        `id, name, company, email, phone,
-         watch_logs(first_access_at, last_access_at, total_watch_seconds)`,
-        { count: "exact" }
-      )
+      .select("id, name, company, email, phone")
       .order("created_at", { ascending: false });
 
     if (search) {
-      query = query.or(
+      registrantsQuery = registrantsQuery.or(
         `name.ilike.%${search}%,company.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`
       );
     }
 
-    const { data: allData, count, error } = await query;
-    if (error) throw error;
+    const { data: registrants, error: regError } = await registrantsQuery;
+    if (regError) throw regError;
 
-    // 상태 계산 및 필터링
-    type RawRow = {
-      id: string;
-      name: string;
-      company: string;
-      email: string;
-      phone: string;
-      watch_logs: {
-        first_access_at: string | null;
-        last_access_at: string | null;
-        total_watch_seconds: number;
-      }[] | null;
-    };
+    // watch_logs 별도 조회 후 Map으로 병합
+    const { data: watchLogs, error: watchError } = await supabase
+      .from("watch_logs")
+      .select("registrant_id, first_access_at, last_access_at, total_watch_seconds");
+    if (watchError) throw watchError;
 
-    const rows = (allData as RawRow[] ?? []).map((r) => {
-      const log = r.watch_logs?.[0] ?? null;
+    const watchMap = new Map(
+      (watchLogs ?? []).map((w) => [w.registrant_id, w])
+    );
+
+    const rows = (registrants ?? []).map((r) => {
+      const log = watchMap.get(r.id) ?? null;
       const rowStatus = getStatus(
         log?.first_access_at ?? null,
         log?.total_watch_seconds ?? 0
