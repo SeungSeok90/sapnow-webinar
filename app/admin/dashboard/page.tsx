@@ -66,12 +66,20 @@ export default function AdminDashboardPage() {
     <div className="p-8 space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">대시보드</h1>
-        <button
-          onClick={() => window.location.reload()}
-          className="text-sm text-gray-500 hover:text-gray-700 transition"
-        >
-          새로고침
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => { window.location.href = "/api/admin/export/report"; }}
+            className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition font-medium"
+          >
+            전체 리포트 다운로드
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-gray-500 hover:text-gray-700 transition"
+          >
+            새로고침
+          </button>
+        </div>
       </div>
 
       {/* 통계 카드 */}
