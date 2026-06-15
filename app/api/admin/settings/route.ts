@@ -29,7 +29,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
     const allowed = [
-      "event_name", "event_date", "vimeo_video_id", "video_open_at",
+      "event_name", "event_date", "stream_url", "video_open_at",
       "survey_url", "material_url", "contact_email", "contact_phone",
     ];
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };

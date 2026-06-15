@@ -36,9 +36,9 @@ export default async function WatchPage() {
     // 설정 로드 실패 시 환경변수 fallback 사용
   }
 
-  const videoId =
-    settings?.vimeo_video_id ||
-    process.env.YOUTUBE_VIDEO_ID ||
+  const streamUrl =
+    settings?.stream_url ||
+    process.env.IVS_PLAYBACK_URL ||
     "";
 
   const videoOpenAt = settings?.video_open_at
@@ -78,8 +78,8 @@ export default async function WatchPage() {
               {videoOpenAt?.toLocaleString("ko-KR")}에 시작됩니다.
             </p>
           </div>
-        ) : videoId ? (
-          <VideoPlayer videoId={videoId} />
+        ) : streamUrl ? (
+          <VideoPlayer streamUrl={streamUrl} />
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-6xl mb-6">🎬</div>

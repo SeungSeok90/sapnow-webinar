@@ -48,7 +48,7 @@ export default function AdminSettingsPage() {
   const fields: { name: keyof EventSettings; label: string; type?: string; placeholder?: string }[] = [
     { name: "event_name", label: "행사명", placeholder: "SAP NOW 웨비나" },
     { name: "event_date", label: "행사 일자", type: "date" },
-    { name: "vimeo_video_id", label: "YouTube 영상 ID", placeholder: "YY12Xq6r0Ww" },
+    { name: "stream_url", label: "IVS 재생 URL", placeholder: "https://xxxx.live-video.net/api/video/v1/....m3u8" },
     { name: "video_open_at", label: "영상 오픈 시간", type: "datetime-local" },
     { name: "survey_url", label: "설문 URL", placeholder: "https://..." },
     { name: "material_url", label: "자료 다운로드 URL", placeholder: "https://..." },

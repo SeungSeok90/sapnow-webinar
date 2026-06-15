@@ -49,7 +49,7 @@ export interface EventSettings {
   id: number;
   event_name: string;
   event_date: string | null;
-  vimeo_video_id: string | null;
+  stream_url: string | null;
   video_open_at: string | null;
   survey_url: string | null;
   material_url: string | null;

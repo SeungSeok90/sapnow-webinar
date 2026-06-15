@@ -3,12 +3,12 @@
 import { useEffect, useRef, useCallback } from "react";
 
 interface VideoPlayerProps {
-  videoId: string;
+  streamUrl: string;
 }
 
-const HEARTBEAT_INTERVAL_MS = 30_000;
-
-export default function VideoPlayer({ videoId }: VideoPlayerProps) {
+export default function VideoPlayer({ streamUrl }: VideoPlayerProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<unknown>(null);
   const elapsedRef = useRef(0);
   const lastTickRef = useRef<number>(Date.now());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -62,6 +62,39 @@ export default function VideoPlayer({ videoId }: VideoPlayerProps) {
     }
   }, []);
 
+  // IVS 플레이어 초기화
+  useEffect(() => {
+    if (!streamUrl || !videoRef.current) return;
+
+    async function initPlayer() {
+      const { create, isPlayerSupported } = await import("amazon-ivs-player");
+
+      if (!isPlayerSupported()) {
+        console.warn("IVS player not supported in this browser");
+        return;
+      }
+
+      const player = create({
+        wasmWorker: "/ivs/amazon-ivs-wasmworker.min.js",
+        wasmBinary: "/ivs/amazon-ivs-wasmworker.min.wasm",
+      });
+
+      player.attachHTMLVideoElement(videoRef.current!);
+      player.load(streamUrl);
+      player.play();
+      playerRef.current = player;
+    }
+
+    initPlayer().catch(console.error);
+
+    return () => {
+      if (playerRef.current) {
+        (playerRef.current as { delete: () => void }).delete();
+        playerRef.current = null;
+      }
+    };
+  }, [streamUrl]);
+
   // 최초 접속 기록
   useEffect(() => {
     fetch("/api/watch/access", { method: "POST" }).catch(console.error);
@@ -103,13 +136,11 @@ export default function VideoPlayer({ videoId }: VideoPlayerProps) {
 
   return (
     <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
-      <iframe
-        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerPolicy="strict-origin-when-cross-origin"
-        allowFullScreen
-        className="absolute inset-0 w-full h-full rounded-lg"
-        title="SAP Innovation Day"
+      <video
+        ref={videoRef}
+        className="absolute inset-0 w-full h-full rounded-lg bg-black"
+        playsInline
+        controls
       />
     </div>
   );
