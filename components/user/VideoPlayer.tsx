@@ -69,7 +69,7 @@ export default function VideoPlayer({ streamUrl }: VideoPlayerProps) {
     async function initPlayer() {
       const { create, isPlayerSupported } = await import("amazon-ivs-player");
 
-      if (!isPlayerSupported()) {
+      if (!isPlayerSupported) {
         console.warn("IVS player not supported in this browser");
         return;
       }
