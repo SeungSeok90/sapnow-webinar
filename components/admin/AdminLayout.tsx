@@ -43,7 +43,7 @@ export default function AdminLayout({
       {/* 사이드바 */}
       <aside className="w-56 bg-gray-900 text-white flex flex-col">
         <div className="px-5 py-5 border-b border-gray-700">
-          <h1 className="font-bold text-sm text-white">SAP NOW 웨비나</h1>
+          <h1 className="font-bold text-sm text-white">SAP NOW AI Tour KOREA</h1>
           <p className="text-xs text-gray-400 mt-0.5">어드민</p>
         </div>
 
