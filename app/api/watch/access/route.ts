@@ -22,28 +22,27 @@ export async function POST(request: NextRequest) {
     const userAgent = request.headers.get("user-agent") || "";
     const now = new Date().toISOString();
 
-    // first_access_at은 최초 1회만 설정, last_access_at은 항상 갱신
-    const { data: existing } = await supabase
-      .from("watch_logs")
-      .select("id, first_access_at")
-      .eq("registrant_id", session.user.registrantId)
-      .single();
+    // INSERT 시도 → 이미 존재하면(unique 충돌) last_access_at만 갱신
+    const { error: insertError } = await supabase.from("watch_logs").insert({
+      registrant_id: session.user.registrantId,
+      first_access_at: now,
+      last_access_at: now,
+      total_watch_seconds: 0,
+      ip_address: getClientIp(request),
+      user_agent: userAgent,
+      device_type: getDeviceType(userAgent),
+    });
 
-    if (existing) {
-      await supabase
-        .from("watch_logs")
-        .update({ last_access_at: now })
-        .eq("registrant_id", session.user.registrantId);
-    } else {
-      await supabase.from("watch_logs").insert({
-        registrant_id: session.user.registrantId,
-        first_access_at: now,
-        last_access_at: now,
-        total_watch_seconds: 0,
-        ip_address: getClientIp(request),
-        user_agent: userAgent,
-        device_type: getDeviceType(userAgent),
-      });
+    if (insertError) {
+      if (insertError.code === "23505") {
+        // 이미 존재 → last_access_at만 갱신
+        await supabase
+          .from("watch_logs")
+          .update({ last_access_at: now })
+          .eq("registrant_id", session.user.registrantId);
+      } else {
+        throw insertError;
+      }
     }
 
     return response;
