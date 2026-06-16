@@ -5,8 +5,8 @@ export default function RegisterPage() {
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">SAP NOW 웨비나</h1>
-          <p className="mt-2 text-gray-500">2025년 7월 14일 | 온라인 행사</p>
+          <h1 className="text-3xl font-bold text-gray-900">SAP NOW AI Tour KOREA</h1>
+          <p className="mt-2 text-gray-500">2025년 7월 14일</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
