@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import type { Registrant } from "@/types/database";
-
-const PAGE_SIZE = 20;
+import Pagination from "@/components/admin/Pagination";
 
 type SortDir = "asc" | "desc";
 
@@ -53,6 +52,7 @@ export default function AdminRegistrantsPage() {
   const [adminRole, setAdminRole] = useState<string>("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [pageSize, setPageSize] = useState(20);
 
   // 관리자 역할 확인 (레이아웃에서 받을 수 없으므로 API 호출로 확인)
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function AdminRegistrantsPage() {
     try {
       const params = new URLSearchParams({
         page: String(page),
-        limit: String(PAGE_SIZE),
+        limit: String(pageSize),
         sortBy,
         sortDir,
         ...(search && { search }),
@@ -85,7 +85,7 @@ export default function AdminRegistrantsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, dateFrom, dateTo, sortBy, sortDir]);
+  }, [page, search, dateFrom, dateTo, sortBy, sortDir, pageSize]);
 
   useEffect(() => {
     fetchData();
@@ -123,7 +123,12 @@ export default function AdminRegistrantsPage() {
     window.location.href = `/api/admin/export/registrants?${params}`;
   }
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / pageSize);
+
+  function handlePageSizeChange(size: number) {
+    setPageSize(size);
+    setPage(1);
+  }
 
   return (
     <div className="p-8 space-y-6">
@@ -260,28 +265,13 @@ export default function AdminRegistrantsPage() {
         </div>
       </div>
 
-      {/* 페이지네이션 */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-3 py-1 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
-          >
-            이전
-          </button>
-          <span className="text-sm text-gray-600">
-            {page} / {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-3 py-1 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
-          >
-            다음
-          </button>
-        </div>
-      )}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={handlePageSizeChange}
+      />
     </div>
   );
 }
