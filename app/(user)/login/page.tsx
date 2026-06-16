@@ -1,7 +1,7 @@
 import LoginForm from "@/components/user/LoginForm";
 
 export const metadata = {
-  title: "로그인 | SAP NOW 웨비나",
+  title: "로그인 | SAP NOW AI Tour KOREA",
 };
 
 export default function LoginPage() {

@@ -9,7 +9,7 @@ import type { UserSessionData } from "@/types/session";
 import type { EventSettings } from "@/types/database";
 
 export const metadata = {
-  title: "영상 시청 | SAP NOW 웨비나",
+  title: "영상 시청 | SAP NOW AI Tour KOREA",
 };
 
 export default async function WatchPage() {

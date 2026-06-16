@@ -1,7 +1,7 @@
 import RegisterForm from "@/components/user/RegisterForm";
 
 export const metadata = {
-  title: "행사 등록 | SAP NOW 웨비나",
+  title: "행사 등록 | SAP NOW AI Tour KOREA",
 };
 
 export default function RegisterPage() {
