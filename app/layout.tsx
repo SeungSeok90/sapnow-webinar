@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "SAP NOW AI Tour KOREA",
   description: "온라인 영상 시청 플랫폼",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({

@@ -1,9 +1,5 @@
 import LoginForm from "@/components/user/LoginForm";
 
-export const metadata = {
-  title: "로그인 | SAP NOW AI Tour KOREA",
-};
-
 export default function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

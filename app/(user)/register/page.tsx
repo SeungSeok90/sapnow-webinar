@@ -1,9 +1,5 @@
 import RegisterForm from "@/components/user/RegisterForm";
 
-export const metadata = {
-  title: "행사 등록 | SAP NOW AI Tour KOREA",
-};
-
 export default function RegisterPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
