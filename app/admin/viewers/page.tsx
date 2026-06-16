@@ -5,6 +5,28 @@ import type { ViewerRow, ViewStatus } from "@/types/api";
 
 const PAGE_SIZE = 20;
 
+type SortDir = "asc" | "desc";
+
+function SortTh({
+  col, label, sortBy, sortDir, onSort,
+}: {
+  col: string; label: string; sortBy: string; sortDir: SortDir;
+  onSort: (col: string) => void;
+}) {
+  const active = sortBy === col;
+  return (
+    <th
+      className="text-left px-4 py-3 cursor-pointer select-none hover:text-gray-700 whitespace-nowrap"
+      onClick={() => onSort(col)}
+    >
+      {label}
+      <span className="ml-1 text-gray-400">
+        {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+      </span>
+    </th>
+  );
+}
+
 const STATUS_LABELS: Record<ViewStatus, string> = {
   none: "미시청",
   accessed: "접속",
@@ -42,6 +64,8 @@ export default function AdminViewersPage() {
   const [searchInput, setSearchInput] = useState("");
   const [status, setStatus] = useState<ViewStatus | "all">("all");
   const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState("last_access_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -49,6 +73,8 @@ export default function AdminViewersPage() {
       const params = new URLSearchParams({
         page: String(page),
         limit: String(PAGE_SIZE),
+        sortBy,
+        sortDir,
         ...(search && { search }),
         ...(status !== "all" && { status }),
       });
@@ -59,11 +85,21 @@ export default function AdminViewersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status]);
+  }, [page, search, status, sortBy, sortDir]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  function handleSort(col: string) {
+    if (sortBy === col) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(col);
+      setSortDir("desc");
+    }
+    setPage(1);
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -142,13 +178,13 @@ export default function AdminViewersPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs">
               <tr>
-                <th className="text-left px-4 py-3">이름</th>
-                <th className="text-left px-4 py-3">회사</th>
+                <SortTh col="name"               label="이름"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <SortTh col="company"            label="회사"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 <th className="text-left px-4 py-3">이메일</th>
-                <th className="text-left px-4 py-3">최초접속</th>
-                <th className="text-left px-4 py-3">최종접속</th>
-                <th className="text-left px-4 py-3">누적시청</th>
-                <th className="text-left px-4 py-3">상태</th>
+                <SortTh col="first_access_at"    label="최초접속" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <SortTh col="last_access_at"     label="최종접속" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <SortTh col="total_watch_seconds" label="누적시청" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <SortTh col="status"             label="상태"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

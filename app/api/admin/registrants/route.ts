@@ -16,11 +16,18 @@ export async function GET(request: NextRequest) {
     const dateTo = searchParams.get("dateTo");
     const offset = (page - 1) * limit;
 
+    const ALLOWED_SORT = ["name", "company", "email", "created_at"] as const;
+    const sortByParam = searchParams.get("sortBy") ?? "created_at";
+    const sortBy = ALLOWED_SORT.includes(sortByParam as typeof ALLOWED_SORT[number])
+      ? sortByParam
+      : "created_at";
+    const ascending = searchParams.get("sortDir") === "asc";
+
     const supabase = createServerClient();
     let query = supabase
       .from("registrants")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: false });
+      .order(sortBy, { ascending });
 
     if (search) {
       query = query.or(

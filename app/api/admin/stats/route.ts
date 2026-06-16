@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         .from("registrants")
         .select("*", { count: "exact", head: true })
         .gte("created_at", todayStart.toISOString()),
-      supabase.from("login_logs").select("registrant_id"),
+      supabase.from("login_logs").select("registrant_id").limit(10000),
       supabase
         .from("watch_logs")
         .select("*", { count: "exact", head: true })

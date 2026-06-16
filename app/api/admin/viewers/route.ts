@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
     let registrantsQuery = supabase
       .from("registrants")
       .select("id, name, company, email, phone")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(10000);
 
     if (search) {
       registrantsQuery = registrantsQuery.or(
@@ -45,7 +46,8 @@ export async function GET(request: NextRequest) {
     // watch_logs 별도 조회 후 Map으로 병합
     const { data: watchLogs, error: watchError } = await supabase
       .from("watch_logs")
-      .select("registrant_id, first_access_at, last_access_at, total_watch_seconds");
+      .select("registrant_id, first_access_at, last_access_at, total_watch_seconds")
+      .limit(10000);
     if (watchError) throw watchError;
 
     const watchMap = new Map(
@@ -76,7 +78,30 @@ export async function GET(request: NextRequest) {
         ? rows
         : rows.filter((r) => r.status === status);
 
-    const paginated = filtered.slice(offset, offset + limit);
+    const sortBy = searchParams.get("sortBy") ?? "last_access_at";
+    const sortDir = searchParams.get("sortDir") === "asc" ? 1 : -1;
+    const STATUS_ORDER: Record<string, number> = { valid_viewer: 3, viewer: 2, accessed: 1, none: 0 };
+
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "name":    return sortDir * a.name.localeCompare(b.name, "ko");
+        case "company": return sortDir * a.company.localeCompare(b.company, "ko");
+        case "total_watch_seconds": return sortDir * (a.total_watch_seconds - b.total_watch_seconds);
+        case "status":  return sortDir * ((STATUS_ORDER[a.status] ?? 0) - (STATUS_ORDER[b.status] ?? 0));
+        case "first_access_at": {
+          const ta = a.first_access_at ? new Date(a.first_access_at).getTime() : -Infinity;
+          const tb = b.first_access_at ? new Date(b.first_access_at).getTime() : -Infinity;
+          return sortDir * (ta - tb);
+        }
+        default: { // last_access_at
+          const ta = a.last_access_at ? new Date(a.last_access_at).getTime() : -Infinity;
+          const tb = b.last_access_at ? new Date(b.last_access_at).getTime() : -Infinity;
+          return sortDir * (ta - tb);
+        }
+      }
+    });
+
+    const paginated = sorted.slice(offset, offset + limit);
 
     return NextResponse.json({
       data: paginated,

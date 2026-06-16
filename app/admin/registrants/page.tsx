@@ -5,6 +5,28 @@ import type { Registrant } from "@/types/database";
 
 const PAGE_SIZE = 20;
 
+type SortDir = "asc" | "desc";
+
+function SortTh({
+  col, label, sortBy, sortDir, onSort, className,
+}: {
+  col: string; label: string; sortBy: string; sortDir: SortDir;
+  onSort: (col: string) => void; className?: string;
+}) {
+  const active = sortBy === col;
+  return (
+    <th
+      className={`text-left px-4 py-3 cursor-pointer select-none hover:text-gray-700 whitespace-nowrap ${className ?? ""}`}
+      onClick={() => onSort(col)}
+    >
+      {label}
+      <span className="ml-1 text-gray-400">
+        {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+      </span>
+    </th>
+  );
+}
+
 function StatusBadge({ agreed }: { agreed: boolean }) {
   return (
     <span
@@ -29,6 +51,8 @@ export default function AdminRegistrantsPage() {
   const [dateTo, setDateTo] = useState("");
   const [loading, setLoading] = useState(false);
   const [adminRole, setAdminRole] = useState<string>("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   // 관리자 역할 확인 (레이아웃에서 받을 수 없으므로 API 호출로 확인)
   useEffect(() => {
@@ -48,6 +72,8 @@ export default function AdminRegistrantsPage() {
       const params = new URLSearchParams({
         page: String(page),
         limit: String(PAGE_SIZE),
+        sortBy,
+        sortDir,
         ...(search && { search }),
         ...(dateFrom && { dateFrom }),
         ...(dateTo && { dateTo }),
@@ -59,11 +85,21 @@ export default function AdminRegistrantsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, dateFrom, dateTo]);
+  }, [page, search, dateFrom, dateTo, sortBy, sortDir]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  function handleSort(col: string) {
+    if (sortBy === col) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(col);
+      setSortDir("desc");
+    }
+    setPage(1);
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -159,14 +195,14 @@ export default function AdminRegistrantsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs">
               <tr>
-                <th className="text-left px-4 py-3">이름</th>
-                <th className="text-left px-4 py-3">회사</th>
-                <th className="text-left px-4 py-3">이메일</th>
+                <SortTh col="name"       label="이름"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <SortTh col="company"    label="회사"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+                <SortTh col="email"      label="이메일" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 <th className="text-left px-4 py-3">휴대폰</th>
                 <th className="text-left px-4 py-3">부서/직함</th>
                 <th className="text-left px-4 py-3">개인정보</th>
                 <th className="text-left px-4 py-3">마케팅</th>
-                <th className="text-left px-4 py-3">등록일시</th>
+                <SortTh col="created_at" label="등록일시" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
