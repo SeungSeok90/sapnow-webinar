@@ -3,6 +3,24 @@
 import { useEffect, useState } from "react";
 import type { EventSettings } from "@/types/database";
 
+// datetime-local input은 시간대 정보가 없는 문자열을 주고받기 때문에,
+// DB의 UTC ISO 문자열과 상호 변환이 필요하다 (없으면 KST 9시간 오차 발생)
+const DATETIME_FIELDS: (keyof EventSettings)[] = ["video_open_at", "video_close_at"];
+
+function toLocalInputValue(iso?: string | null): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const localMs = date.getTime() - date.getTimezoneOffset() * 60000;
+  return new Date(localMs).toISOString().slice(0, 16);
+}
+
+function toIsoString(localValue?: string | null): string | null {
+  if (!localValue) return null;
+  const date = new Date(localValue);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
 export default function AdminSettingsPage() {
   const [form, setForm] = useState<Partial<EventSettings>>({});
   const [loading, setLoading] = useState(true);
@@ -12,7 +30,15 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then((data) => { if (!data.error) setForm(data); })
+      .then((data) => {
+        if (!data.error) {
+          const converted = { ...data };
+          for (const field of DATETIME_FIELDS) {
+            converted[field] = toLocalInputValue(data[field]);
+          }
+          setForm(converted);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -26,10 +52,14 @@ export default function AdminSettingsPage() {
     setSaving(true);
     setMessage(null);
     try {
+      const payload: Record<string, unknown> = { ...form };
+      for (const field of DATETIME_FIELDS) {
+        payload[field] = toIsoString(form[field] as string | undefined);
+      }
       const res = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) setMessage({ type: "error", text: data.error });
