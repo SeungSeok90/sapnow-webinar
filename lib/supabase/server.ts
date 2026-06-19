@@ -16,6 +16,10 @@ export function createServerClient() {
       autoRefreshToken: false,
       persistSession: false,
     },
+    global: {
+      // Next.js의 fetch Data Cache로 인해 DB 조회 결과가 캐싱되는 것을 방지
+      fetch: (url, options) => fetch(url, { ...options, cache: "no-store" }),
+    },
     // @ts-ignore Node.js 20 WebSocket 폴리필
     realtime: { transport: ws },
   });
