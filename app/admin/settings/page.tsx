@@ -4,21 +4,26 @@ import { useEffect, useState } from "react";
 import type { EventSettings } from "@/types/database";
 
 // datetime-local input은 시간대 정보가 없는 문자열을 주고받기 때문에,
-// DB의 UTC ISO 문자열과 상호 변환이 필요하다 (없으면 KST 9시간 오차 발생)
+// DB의 UTC ISO 문자열과 상호 변환이 필요하다. 행사가 한국 단일 시간대
+// 기준이므로 브라우저/서버의 시스템 시간대에 의존하지 않고 KST(+09:00,
+// DST 없음)로 고정해서 변환한다.
 const DATETIME_FIELDS: (keyof EventSettings)[] = ["video_open_at", "video_close_at"];
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 function toLocalInputValue(iso?: string | null): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  const localMs = date.getTime() - date.getTimezoneOffset() * 60000;
-  return new Date(localMs).toISOString().slice(0, 16);
+  return new Date(date.getTime() + KST_OFFSET_MS).toISOString().slice(0, 16);
 }
 
 function toIsoString(localValue?: string | null): string | null {
   if (!localValue) return null;
-  const date = new Date(localValue);
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  // localValue("YYYY-MM-DDTHH:mm")는 KST 벽시계 시각이므로, UTC로 강제
+  // 파싱한 뒤 KST 오프셋만큼 빼서 실제 UTC 시각으로 환산한다.
+  const asUtc = new Date(`${localValue}Z`);
+  if (Number.isNaN(asUtc.getTime())) return null;
+  return new Date(asUtc.getTime() - KST_OFFSET_MS).toISOString();
 }
 
 export default function AdminSettingsPage() {
