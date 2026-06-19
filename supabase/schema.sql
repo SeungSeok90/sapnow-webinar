@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS event_settings (
   event_date            DATE,
   vimeo_video_id        TEXT,
   video_open_at         TIMESTAMPTZ,
+  video_close_at        TIMESTAMPTZ,
   survey_url            TEXT,
   material_url          TEXT,
   contact_email         TEXT,

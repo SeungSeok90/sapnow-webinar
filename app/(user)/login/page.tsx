@@ -1,12 +1,21 @@
+import Image from "next/image";
 import LoginForm from "@/components/user/LoginForm";
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <main className="relative min-h-screen flex items-center justify-center px-4">
+      <Image
+        src="/login-background.png"
+        alt=""
+        fill
+        priority
+        className="object-cover -z-10"
+      />
+      <div className="absolute inset-0 bg-black/40 -z-10" />
+
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">SAP NOW AI Tour KOREA</h1>
-          <p className="mt-2 text-gray-500">2025년 7월 14일</p>
+          <h1 className="text-3xl font-bold text-white">SAP NOW AI Tour KOREA</h1>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">

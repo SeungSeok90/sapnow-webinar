@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { createServerClient } from "@/lib/supabase/server";
 import { userSessionOptions } from "@/lib/session/user";
 import VideoPlayer from "@/components/user/VideoPlayer";
@@ -40,20 +41,36 @@ export default async function WatchPage() {
   const videoOpenAt = settings?.video_open_at
     ? new Date(settings.video_open_at)
     : null;
-  const isBeforeOpen = videoOpenAt ? new Date() < videoOpenAt : false;
+  const videoCloseAt = settings?.video_close_at
+    ? new Date(settings.video_close_at)
+    : null;
+  const now = new Date();
+  const isBeforeOpen = videoOpenAt ? now < videoOpenAt : false;
+  const isAfterClose = videoCloseAt ? now > videoCloseAt : false;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="relative min-h-screen text-white">
+      <Image
+        src="/login-background.png"
+        alt=""
+        fill
+        priority
+        className="object-cover -z-10"
+      />
+      <div className="absolute inset-0 bg-black/70 -z-10" />
+
       {/* 헤더 */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold">
-              {settings?.event_name || "SAP NOW AI Tour KOREA"}
-            </h1>
-            {settings?.event_date && (
-              <p className="text-xs text-gray-400">{settings.event_date}</p>
-            )}
+          <div className="flex items-center gap-3">
+            <Image
+              src="/icon.png"
+              alt="SAP"
+              width={32}
+              height={32}
+              className="rounded"
+            />
+            <h1 className="text-lg font-bold">SAP NOW AI Tour KOREA</h1>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-300">
@@ -66,12 +83,21 @@ export default async function WatchPage() {
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-5xl mx-auto px-4 py-8">
-        {isBeforeOpen ? (
+        <div>
+          {isBeforeOpen ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-6xl mb-6">⏰</div>
             <h2 className="text-2xl font-bold mb-2">영상 시청 준비 중</h2>
             <p className="text-gray-400">
               {videoOpenAt?.toLocaleString("ko-KR")}에 시작됩니다.
+            </p>
+          </div>
+        ) : isAfterClose ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="text-6xl mb-6">🔒</div>
+            <h2 className="text-2xl font-bold mb-2">시청 가능 시간이 종료되었습니다</h2>
+            <p className="text-gray-400">
+              시청 마감: {videoCloseAt?.toLocaleString("ko-KR")}
             </p>
           </div>
         ) : streamUrl ? (
@@ -82,7 +108,8 @@ export default async function WatchPage() {
             <h2 className="text-2xl font-bold mb-2">영상 준비 중</h2>
             <p className="text-gray-400">잠시 후 영상이 제공될 예정입니다.</p>
           </div>
-        )}
+          )}
+        </div>
 
         {/* 하단 안내 영역 */}
         <div className="mt-10 border-t border-gray-700 pt-8 space-y-6">
@@ -92,7 +119,6 @@ export default async function WatchPage() {
             <ul className="text-sm text-gray-400 space-y-1 list-disc list-inside">
               <li>안정적인 시청을 위해 크롬 브라우저를 권장합니다.</li>
               <li>영상은 등록하신 본인만 시청 가능합니다.</li>
-              <li>문제가 발생하면 아래 문의처로 연락해주세요.</li>
             </ul>
           </div>
 
@@ -119,25 +145,6 @@ export default async function WatchPage() {
               </a>
             )}
           </div>
-
-          {/* 문의처 */}
-          {(settings?.contact_email || settings?.contact_phone) && (
-            <div className="text-sm text-gray-400">
-              <span className="font-medium text-gray-300">문의 </span>
-              {settings.contact_email && (
-                <a
-                  href={`mailto:${settings.contact_email}`}
-                  className="hover:text-white transition"
-                >
-                  {settings.contact_email}
-                </a>
-              )}
-              {settings.contact_email && settings.contact_phone && (
-                <span className="mx-2">·</span>
-              )}
-              {settings.contact_phone && <span>{settings.contact_phone}</span>}
-            </div>
-          )}
         </div>
       </main>
     </div>

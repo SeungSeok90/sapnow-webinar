@@ -50,6 +50,7 @@ export default function AdminSettingsPage() {
     { name: "event_date", label: "행사 일자", type: "date" },
     { name: "stream_url", label: "IVS 재생 URL", placeholder: "https://xxxx.live-video.net/api/video/v1/....m3u8" },
     { name: "video_open_at", label: "영상 오픈 시간", type: "datetime-local" },
+    { name: "video_close_at", label: "영상 마감 시간", type: "datetime-local" },
     { name: "survey_url", label: "설문 URL", placeholder: "https://..." },
     { name: "material_url", label: "자료 다운로드 URL", placeholder: "https://..." },
     { name: "contact_email", label: "문의 이메일", type: "email", placeholder: "contact@example.com" },

@@ -51,6 +51,7 @@ export interface EventSettings {
   event_date: string | null;
   stream_url: string | null;
   video_open_at: string | null;
+  video_close_at: string | null;
   survey_url: string | null;
   material_url: string | null;
   contact_email: string | null;
