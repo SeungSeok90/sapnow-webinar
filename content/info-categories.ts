@@ -15,14 +15,14 @@ export const INFO_CATEGORIES: InfoCategory[] = [
     title: "Information",
     emoji: "ℹ️",
     description: "행사 정보를 확인하세요",
-    image: "/info/img/information.png",
+    image: "https://keystonellc.kr/sap/2026/0714_now/info/img/info.png",
   },
   {
     slug: "keynote",
     title: "Keynote",
     emoji: "🎤",
     description: "주요 키노트를 확인하세요",
-    image: "/info/img/keynote.png",
+    image: "https://keystonellc.kr/sap/2026/0714_now/info/img/keynote.png",
   },
   {
     slug: "agenda",
@@ -36,21 +36,21 @@ export const INFO_CATEGORIES: InfoCategory[] = [
     title: "Sponsor",
     emoji: "🤝",
     description: "참여 스폰서 정보를 확인하세요",
-    image: "/info/img/sponsor.png",
+    image: "https://keystonellc.kr/sap/2026/0714_now/info/img/sponsor.png",
   },
   {
     slug: "event",
     title: "Event",
     emoji: "⭐",
     description: "이벤트와 혜택 정보를 확인하세요",
-    image: "/info/img/event.png",
+    image: "https://keystonellc.kr/sap/2026/0714_now/info/img/event.png",
   },
   {
     slug: "map",
     title: "Event Map",
     emoji: "📍",
     description: "행사장 위치를 확인하세요",
-    image: "/info/img/map.png",
+    image: "https://keystonellc.kr/sap/2026/0714_now/info/img/location.png",
   },
 ];
 
