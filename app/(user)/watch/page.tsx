@@ -61,19 +61,21 @@ export default async function WatchPage() {
 
       {/* 헤더 */}
       <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3">
+          <div className="flex min-w-0 items-center gap-2">
             <Image
               src="/icon.png"
               alt="SAP"
-              width={32}
-              height={32}
-              className="rounded"
+              width={28}
+              height={28}
+              className="shrink-0 rounded"
             />
-            <h1 className="text-lg font-bold">SAP NOW AI Tour KOREA</h1>
+            <h1 className="truncate text-base font-bold sm:text-lg">
+              SAP NOW AI Tour KOREA
+            </h1>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-300">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+            <span className="hidden text-sm text-gray-300 sm:inline">
               {session.user.name}님
             </span>
             <LogoutButton />
