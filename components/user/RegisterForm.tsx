@@ -11,7 +11,9 @@ interface FormData {
   department: string;
   title: string;
   privacy_agreed: boolean;
-  marketing_agreed: boolean;
+  profile_public_agreed: boolean;
+  marketing_email_agreed: boolean;
+  marketing_phone_agreed: boolean;
 }
 
 const initialForm: FormData = {
@@ -22,7 +24,9 @@ const initialForm: FormData = {
   department: "",
   title: "",
   privacy_agreed: false,
-  marketing_agreed: false,
+  profile_public_agreed: false,
+  marketing_email_agreed: false,
+  marketing_phone_agreed: false,
 };
 
 export default function RegisterForm() {
@@ -56,6 +60,8 @@ export default function RegisterForm() {
     if (!form.phone.trim()) {
       newErrors.phone = "휴대폰 번호를 입력해주세요.";
     }
+    if (!form.department.trim()) newErrors.department = "부서명을 입력해주세요.";
+    if (!form.title.trim()) newErrors.title = "직급을 입력해주세요.";
     if (!form.privacy_agreed) {
       newErrors.privacy_agreed = "개인정보 수집 및 이용에 동의해주세요.";
     }
@@ -80,10 +86,12 @@ export default function RegisterForm() {
           company: form.company.trim(),
           email: form.email.trim(),
           phone: form.phone.trim(),
-          department: form.department.trim() || undefined,
-          title: form.title.trim() || undefined,
+          department: form.department.trim(),
+          title: form.title.trim(),
           privacy_agreed: form.privacy_agreed,
-          marketing_agreed: form.marketing_agreed,
+          profile_public_agreed: form.profile_public_agreed,
+          marketing_email_agreed: form.marketing_email_agreed,
+          marketing_phone_agreed: form.marketing_phone_agreed,
         }),
       });
 
@@ -168,10 +176,10 @@ export default function RegisterForm() {
         {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
       </div>
 
-      {/* 부서명 (선택) */}
+      {/* 부서명 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          부서명 <span className="text-gray-400 text-xs">(선택)</span>
+          부서명 <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -181,12 +189,13 @@ export default function RegisterForm() {
           placeholder="IT팀"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {errors.department && <p className="mt-1 text-sm text-red-500">{errors.department}</p>}
       </div>
 
-      {/* 직함 (선택) */}
+      {/* 직급 */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          직함 <span className="text-gray-400 text-xs">(선택)</span>
+          직급 <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -196,6 +205,7 @@ export default function RegisterForm() {
           placeholder="과장"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+        {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
       </div>
 
       {/* 개인정보 동의 */}
@@ -213,12 +223,31 @@ export default function RegisterForm() {
           </button>
 
           {privacyOpen && (
-            <div className="mt-2 p-3 bg-gray-50 rounded text-xs text-gray-600 leading-relaxed max-h-40 overflow-y-auto">
-              <p className="font-semibold mb-1">개인정보 수집 및 이용 동의</p>
-              <p>수집 항목: 성명, 회사명, 이메일, 휴대폰 번호, 부서명, 직함</p>
-              <p>수집 목적: 행사 참가 관리, 영상 시청 서비스 제공</p>
-              <p>보유 기간: 행사 종료 후 1년</p>
-              <p>귀하는 개인정보 제공을 거부할 권리가 있으나, 거부 시 행사 참가가 제한될 수 있습니다.</p>
+            <div className="mt-2 p-3 bg-gray-50 rounded text-xs text-gray-600 leading-relaxed max-h-48 overflow-y-auto space-y-2">
+              <p>
+                위에 개인 데이터를 입력하고 제출을 클릭하면 개인정보 보호
+                정책에 설명된 대로 SAP가 귀하의 특수 범주의 데이터를
+                처리하는 것에 동의하게 됩니다.
+              </p>
+              <p>
+                여기에 제공해주신 모든 정보는 SAP{" "}
+                <a
+                  href="https://www.sap.com/korea/about/legal/privacy.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  개인정보보호정책
+                </a>
+                에 따라 사용됩니다.
+              </p>
+              <div className="pt-1 border-t border-gray-200">
+                <p className="font-semibold mb-1">수집 및 이용 안내</p>
+                <p>수집 항목: 성명, 회사명, 이메일, 휴대폰 번호, 부서명, 직급</p>
+                <p>수집 목적: 행사 참가 관리, 영상 시청 서비스 제공</p>
+                <p>보유 기간: 행사 종료 후 1년</p>
+                <p>귀하는 개인정보 제공을 거부할 권리가 있으나, 거부 시 행사 참가가 제한될 수 있습니다.</p>
+              </div>
             </div>
           )}
 
@@ -237,24 +266,55 @@ export default function RegisterForm() {
           )}
         </div>
 
-        {/* 마케팅 동의 */}
+        {/* 프로필 공개 동의 */}
         <div className="border-t border-gray-200 pt-3">
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
-              name="marketing_agreed"
-              checked={form.marketing_agreed}
+              name="profile_public_agreed"
+              checked={form.profile_public_agreed}
               onChange={handleChange}
-              className="w-4 h-4 accent-blue-600"
+              className="w-4 h-4 mt-0.5 accent-blue-600"
             />
             <span className="text-sm text-gray-700">
-              마케팅 정보 수신 동의{" "}
+              예, SAP가 내 이벤트 프로필을 이벤트 참석자가 공개적으로
+              액세스할 수 있게 하고 SAP 이벤트 웹사이트 및 모바일
+              애플리케이션에 내 프로필의 공개 속성을 표시하도록 동의합니다.{" "}
               <span className="text-gray-400 text-xs">(선택)</span>
             </span>
           </label>
-          <p className="mt-1 text-xs text-gray-400 ml-6">
-            행사 및 관련 정보를 이메일로 받아보실 수 있습니다.
+        </div>
+
+        {/* 마케팅 동의 */}
+        <div className="border-t border-gray-200 pt-3">
+          <p className="text-sm text-gray-700 mb-2">
+            저는 아래의 각 채널에 확인 표시를 하여 SAP가 저에게 SAP 제품
+            및 서비스에 대한 뉴스를 전달하기 위해 저의 연락처 세부 정보를
+            사용할 수 있다는 데 동의합니다.{" "}
+            <span className="text-gray-400 text-xs">(선택)</span>
           </p>
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="marketing_email_agreed"
+                checked={form.marketing_email_agreed}
+                onChange={handleChange}
+                className="w-4 h-4 accent-blue-600"
+              />
+              <span className="text-sm text-gray-700">전자메일</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="marketing_phone_agreed"
+                checked={form.marketing_phone_agreed}
+                onChange={handleChange}
+                className="w-4 h-4 accent-blue-600"
+              />
+              <span className="text-sm text-gray-700">전화</span>
+            </label>
+          </div>
         </div>
       </div>
 

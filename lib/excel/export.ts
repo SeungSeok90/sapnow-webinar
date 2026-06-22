@@ -14,7 +14,8 @@ export function exportRegistrantsToExcel(
     직함: r.title ?? "",
     개인정보동의: r.privacy_agreed ? "동의" : "미동의",
     개인정보동의일시: r.privacy_agreed_at ?? "",
-    마케팅동의: r.marketing_agreed ? "동의" : "미동의",
+    프로필공개동의: r.profile_public_agreed ? "동의" : "미동의",
+    마케팅채널: r.marketing_channel,
     마케팅동의일시: r.marketing_agreed_at ?? "",
     등록일시: r.created_at,
   }));
@@ -113,13 +114,14 @@ export function exportFullReport(
     부서: r.department ?? "",
     직함: r.title ?? "",
     개인정보동의: r.privacy_agreed ? "동의" : "미동의",
-    마케팅동의: r.marketing_agreed ? "동의" : "미동의",
+    프로필공개동의: r.profile_public_agreed ? "동의" : "미동의",
+    마케팅채널: r.marketing_channel,
     등록일시: r.created_at ? new Date(r.created_at).toLocaleString("ko-KR") : "",
   }));
   const regSheet = XLSX.utils.json_to_sheet(regRows);
   regSheet["!cols"] = [
     { wch: 10 }, { wch: 20 }, { wch: 28 }, { wch: 15 },
-    { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 22 },
+    { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 22 },
   ];
   XLSX.utils.book_append_sheet(wb, regSheet, "등록자 목록");
 

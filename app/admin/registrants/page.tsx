@@ -40,6 +40,26 @@ function StatusBadge({ agreed }: { agreed: boolean }) {
   );
 }
 
+const MARKETING_CHANNEL_LABEL: Record<string, string> = {
+  Both: "이메일+전화",
+  Email: "이메일",
+  Phone: "전화",
+  "Not applicable": "해당없음",
+};
+
+function MarketingChannelBadge({ channel }: { channel: string }) {
+  const active = channel !== "Not applicable";
+  return (
+    <span
+      className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+        active ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-500"
+      }`}
+    >
+      {MARKETING_CHANNEL_LABEL[channel] ?? channel}
+    </span>
+  );
+}
+
 export default function AdminRegistrantsPage() {
   const [registrants, setRegistrants] = useState<Registrant[]>([]);
   const [total, setTotal] = useState(0);
@@ -206,6 +226,7 @@ export default function AdminRegistrantsPage() {
                 <th className="text-left px-4 py-3">휴대폰</th>
                 <th className="text-left px-4 py-3">부서/직함</th>
                 <th className="text-left px-4 py-3">개인정보</th>
+                <th className="text-left px-4 py-3">프로필공개</th>
                 <th className="text-left px-4 py-3">마케팅</th>
                 <SortTh col="created_at" label="등록일시" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3"></th>
@@ -214,13 +235,13 @@ export default function AdminRegistrantsPage() {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={10} className="px-4 py-8 text-center text-gray-400">
                     로딩 중...
                   </td>
                 </tr>
               ) : registrants.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={10} className="px-4 py-8 text-center text-gray-400">
                     등록자가 없습니다.
                   </td>
                 </tr>
@@ -238,7 +259,10 @@ export default function AdminRegistrantsPage() {
                       <StatusBadge agreed={r.privacy_agreed} />
                     </td>
                     <td className="px-4 py-2.5">
-                      <StatusBadge agreed={r.marketing_agreed} />
+                      <StatusBadge agreed={r.profile_public_agreed} />
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <MarketingChannelBadge channel={r.marketing_channel} />
                     </td>
                     <td className="px-4 py-2.5 text-gray-400 text-xs">
                       {new Date(r.created_at).toLocaleString("ko-KR", {

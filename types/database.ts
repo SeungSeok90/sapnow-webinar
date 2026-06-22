@@ -8,8 +8,11 @@ export interface Registrant {
   title: string | null;
   privacy_agreed: boolean;
   privacy_agreed_at: string | null;
+  profile_public_agreed: boolean;
+  profile_public_agreed_at: string | null;
   marketing_agreed: boolean;
   marketing_agreed_at: string | null;
+  marketing_channel: "Both" | "Email" | "Phone" | "Not applicable";
   created_at: string;
   updated_at: string;
 }

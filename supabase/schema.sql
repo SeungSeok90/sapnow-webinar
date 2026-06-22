@@ -15,11 +15,23 @@ CREATE TABLE IF NOT EXISTS registrants (
   title                 TEXT,
   privacy_agreed        BOOLEAN NOT NULL DEFAULT false,
   privacy_agreed_at     TIMESTAMPTZ,
+  profile_public_agreed BOOLEAN NOT NULL DEFAULT false,
+  profile_public_agreed_at TIMESTAMPTZ,
   marketing_agreed      BOOLEAN NOT NULL DEFAULT false,
   marketing_agreed_at   TIMESTAMPTZ,
+  marketing_channel     TEXT NOT NULL DEFAULT 'Not applicable'
+                          CHECK (marketing_channel IN ('Both', 'Email', 'Phone', 'Not applicable')),
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- 기존(운영 중) 테이블에 신규 컬럼 추가 (이미 있으면 무시)
+ALTER TABLE registrants ADD COLUMN IF NOT EXISTS profile_public_agreed BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE registrants ADD COLUMN IF NOT EXISTS profile_public_agreed_at TIMESTAMPTZ;
+ALTER TABLE registrants ADD COLUMN IF NOT EXISTS marketing_channel TEXT NOT NULL DEFAULT 'Not applicable';
+ALTER TABLE registrants DROP CONSTRAINT IF EXISTS registrants_marketing_channel_check;
+ALTER TABLE registrants ADD CONSTRAINT registrants_marketing_channel_check
+  CHECK (marketing_channel IN ('Both', 'Email', 'Phone', 'Not applicable'));
 
 CREATE INDEX IF NOT EXISTS idx_registrants_email   ON registrants (email);
 CREATE INDEX IF NOT EXISTS idx_registrants_created ON registrants (created_at DESC);

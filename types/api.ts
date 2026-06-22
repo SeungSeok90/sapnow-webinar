@@ -9,10 +9,12 @@ export interface RegisterRequest {
   company: string;
   email: string;
   phone: string;
-  department?: string;
-  title?: string;
+  department: string;
+  title: string;
   privacy_agreed: boolean;
-  marketing_agreed: boolean;
+  profile_public_agreed: boolean;
+  marketing_email_agreed: boolean;
+  marketing_phone_agreed: boolean;
 }
 
 export interface LoginRequest {

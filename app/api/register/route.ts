@@ -13,11 +13,13 @@ export async function POST(request: NextRequest) {
       department,
       title,
       privacy_agreed,
-      marketing_agreed,
+      profile_public_agreed,
+      marketing_email_agreed,
+      marketing_phone_agreed,
     } = body;
 
     // 필수 항목 검증
-    if (!name || !company || !email || !phone || !privacy_agreed) {
+    if (!name || !company || !email || !phone || !department || !title || !privacy_agreed) {
       return NextResponse.json(
         { error: "필수 항목을 모두 입력해주세요." },
         { status: 400 }
@@ -36,17 +38,29 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
     const supabase = createServerClient();
 
+    const marketingChannel =
+      marketing_email_agreed && marketing_phone_agreed
+        ? "Both"
+        : marketing_email_agreed
+        ? "Email"
+        : marketing_phone_agreed
+        ? "Phone"
+        : "Not applicable";
+
     const { error } = await supabase.from("registrants").insert({
       name: name.trim(),
       company: company.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
-      department: department?.trim() || null,
-      title: title?.trim() || null,
+      department: department.trim(),
+      title: title.trim(),
       privacy_agreed: true,
       privacy_agreed_at: now,
-      marketing_agreed: marketing_agreed ?? false,
-      marketing_agreed_at: marketing_agreed ? now : null,
+      profile_public_agreed: profile_public_agreed ?? false,
+      profile_public_agreed_at: profile_public_agreed ? now : null,
+      marketing_agreed: marketingChannel !== "Not applicable",
+      marketing_agreed_at: marketingChannel !== "Not applicable" ? now : null,
+      marketing_channel: marketingChannel,
     });
 
     if (error) {
