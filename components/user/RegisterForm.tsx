@@ -259,7 +259,7 @@ export default function RegisterForm() {
               onChange={handleChange}
               className="w-4 h-4 accent-blue-600"
             />
-            <span className="text-sm text-gray-700">동의합니다 (필수)</span>
+            <span className="text-sm text-gray-700">동의합니다</span>
           </label>
           {errors.privacy_agreed && (
             <p className="mt-1 text-sm text-red-500">{errors.privacy_agreed}</p>
@@ -279,8 +279,7 @@ export default function RegisterForm() {
             <span className="text-sm text-gray-700">
               예, SAP가 내 이벤트 프로필을 이벤트 참석자가 공개적으로
               액세스할 수 있게 하고 SAP 이벤트 웹사이트 및 모바일
-              애플리케이션에 내 프로필의 공개 속성을 표시하도록 동의합니다.{" "}
-              <span className="text-gray-400 text-xs">(선택)</span>
+              애플리케이션에 내 프로필의 공개 속성을 표시하도록 동의합니다.
             </span>
           </label>
         </div>
@@ -290,8 +289,7 @@ export default function RegisterForm() {
           <p className="text-sm text-gray-700 mb-2">
             저는 아래의 각 채널에 확인 표시를 하여 SAP가 저에게 SAP 제품
             및 서비스에 대한 뉴스를 전달하기 위해 저의 연락처 세부 정보를
-            사용할 수 있다는 데 동의합니다.{" "}
-            <span className="text-gray-400 text-xs">(선택)</span>
+            사용할 수 있다는 데 동의합니다.
           </p>
           <div className="flex gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
