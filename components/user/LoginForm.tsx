@@ -7,7 +7,6 @@ import Link from "next/link";
 export default function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [phoneLast4, setPhoneLast4] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -15,8 +14,8 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
 
-    if (!email.trim() || !phoneLast4.trim()) {
-      setError("이메일과 휴대폰 번호 뒤 4자리를 입력해주세요.");
+    if (!email.trim()) {
+      setError("이메일을 입력해주세요.");
       return;
     }
 
@@ -26,7 +25,7 @@ export default function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), phoneLast4: phoneLast4.trim() }),
+        body: JSON.stringify({ email: email.trim() }),
       });
 
       const data = await res.json();
@@ -57,21 +56,6 @@ export default function LoginForm() {
           placeholder="등록하신 이메일 주소"
           autoComplete="email"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          휴대폰 번호 뒤 4자리
-        </label>
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={4}
-          value={phoneLast4}
-          onChange={(e) => { setPhoneLast4(e.target.value.replace(/\D/g, "")); setError(""); }}
-          placeholder="0000"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-widest text-center text-xl"
         />
       </div>
 

@@ -19,7 +19,6 @@ export interface RegisterRequest {
 
 export interface LoginRequest {
   email: string;
-  phoneLast4: string;
 }
 
 export interface HeartbeatRequest {

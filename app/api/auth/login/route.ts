@@ -9,18 +9,11 @@ import type { UserSessionData } from "@/types/session";
 export async function POST(request: NextRequest) {
   try {
     const body: LoginRequest = await request.json();
-    const { email, phoneLast4 } = body;
+    const { email } = body;
 
-    if (!email || !phoneLast4) {
+    if (!email) {
       return NextResponse.json(
-        { error: "이메일과 휴대폰 번호 뒤 4자리를 입력해주세요." },
-        { status: 400 }
-      );
-    }
-
-    if (!/^\d{4}$/.test(phoneLast4)) {
-      return NextResponse.json(
-        { error: "휴대폰 번호 뒤 4자리는 숫자만 입력해주세요." },
+        { error: "이메일을 입력해주세요." },
         { status: 400 }
       );
     }
@@ -29,24 +22,13 @@ export async function POST(request: NextRequest) {
 
     const { data: registrant, error } = await supabase
       .from("registrants")
-      .select("id, name, email, phone")
+      .select("id, name, email")
       .eq("email", email.trim().toLowerCase())
       .single();
 
     if (error || !registrant) {
       return NextResponse.json(
         { error: "등록 정보와 일치하지 않습니다. 이메일을 확인해주세요." },
-        { status: 401 }
-      );
-    }
-
-    // 휴대폰 뒤 4자리 비교 (숫자만 추출 후 비교)
-    const phoneDigits = registrant.phone.replace(/\D/g, "");
-    const inputLast4 = phoneLast4.trim();
-
-    if (!phoneDigits.endsWith(inputLast4)) {
-      return NextResponse.json(
-        { error: "등록 정보와 일치하지 않습니다. 휴대폰 번호를 확인해주세요." },
         { status: 401 }
       );
     }
