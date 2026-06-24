@@ -29,6 +29,29 @@ const COLUMN_MAP: Record<string, keyof ImportRow> = {
   직급: "title",
 };
 
+// 국가번호 제거 및 한국 표준 형식으로 정규화
+function normalizePhone(raw: string): string {
+  let digits = raw.replace(/\D/g, "");
+
+  if (digits.startsWith("0082")) {
+    digits = "0" + digits.slice(4);
+  } else if (digits.startsWith("82")) {
+    digits = "0" + digits.slice(2);
+  }
+
+  if (digits.length === 11 && digits.startsWith("010")) {
+    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+  }
+  if (digits.length === 10) {
+    if (digits.startsWith("02")) {
+      return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
+    }
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+
+  return raw.trim();
+}
+
 // GET: 업로드용 템플릿 Excel 다운로드
 export async function GET() {
   const adminOrResponse = await requireAdmin();
@@ -111,7 +134,7 @@ export async function POST(request: NextRequest) {
         name: mapped.name,
         company: mapped.company,
         email: mapped.email,
-        phone: mapped.phone,
+        phone: normalizePhone(mapped.phone),
         department: mapped.department ?? "",
         title: mapped.title ?? "",
       });
