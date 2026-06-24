@@ -1,8 +1,137 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { Registrant } from "@/types/database";
 import Pagination from "@/components/admin/Pagination";
+
+type ImportResult = {
+  inserted: number;
+  skipped: number;
+  parseErrors: string[];
+};
+
+function ImportModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [error, setError] = useState("");
+
+  async function handleUpload() {
+    const file = fileRef.current?.files?.[0];
+    if (!file) { setError("파일을 선택해주세요."); return; }
+
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/import/registrants", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "업로드에 실패했습니다.");
+        if (data.parseErrors?.length) setResult({ inserted: 0, skipped: 0, parseErrors: data.parseErrors });
+        return;
+      }
+
+      setResult(data);
+      if (data.inserted > 0) onSuccess();
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">등록자 일괄 업로드</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-xs text-blue-700 space-y-1">
+          <p className="font-medium">필수 컬럼: 성명(또는 이름), 회사명, 이메일, 휴대폰</p>
+          <p className="text-blue-500">선택 컬럼: 부서명(또는 부서), 직급(또는 직함)</p>
+          <p className="text-blue-500">이미 등록된 이메일은 자동으로 건너뜁니다.</p>
+        </div>
+
+        <div className="flex gap-2">
+          <a
+            href="/api/admin/import/registrants"
+            className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition"
+          >
+            템플릿 다운로드
+          </a>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">파일 선택</label>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 file:text-sm file:cursor-pointer hover:file:bg-gray-200"
+          />
+        </div>
+
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        {result && (
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm space-y-1">
+            <p className="font-medium text-gray-800">
+              ✓ {result.inserted}명 등록 완료
+              {result.skipped > 0 && (
+                <span className="font-normal text-gray-500 ml-2">({result.skipped}명 중복 건너뜀)</span>
+              )}
+            </p>
+            {result.parseErrors.length > 0 && (
+              <div className="mt-2 space-y-0.5">
+                <p className="text-xs text-orange-600 font-medium">형식 오류 ({result.parseErrors.length}건):</p>
+                <ul className="text-xs text-orange-500 list-disc list-inside max-h-24 overflow-y-auto">
+                  {result.parseErrors.map((e, i) => <li key={i}>{e}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 pt-1">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+          >
+            닫기
+          </button>
+          <button
+            onClick={handleUpload}
+            disabled={loading}
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {loading ? "업로드 중..." : "업로드"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 type SortDir = "asc" | "desc";
 
@@ -73,6 +202,7 @@ export default function AdminRegistrantsPage() {
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [pageSize, setPageSize] = useState(20);
+  const [importOpen, setImportOpen] = useState(false);
 
   // 관리자 역할 확인 (레이아웃에서 받을 수 없으므로 API 호출로 확인)
   useEffect(() => {
@@ -152,12 +282,25 @@ export default function AdminRegistrantsPage() {
 
   return (
     <div className="p-8 space-y-6">
+      {importOpen && (
+        <ImportModal
+          onClose={() => setImportOpen(false)}
+          onSuccess={() => { fetchData(); }}
+        />
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">등록자 관리</h1>
           <p className="text-sm text-gray-500 mt-0.5">전체 {total.toLocaleString()}명</p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => setImportOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+          >
+            일괄 업로드
+          </button>
           <button
             onClick={handleExport}
             className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
