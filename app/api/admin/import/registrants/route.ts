@@ -123,7 +123,6 @@ export async function POST(request: NextRequest) {
       if (!mapped.name) { parseErrors.push(`${rowNum}행: 이름 누락`); continue; }
       if (!mapped.company) { parseErrors.push(`${rowNum}행: 회사명 누락`); continue; }
       if (!mapped.email) { parseErrors.push(`${rowNum}행: 이메일 누락`); continue; }
-      if (!mapped.phone) { parseErrors.push(`${rowNum}행: 휴대폰 누락`); continue; }
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mapped.email)) {
         parseErrors.push(`${rowNum}행: 이메일 형식 오류 (${mapped.email})`);
@@ -134,7 +133,7 @@ export async function POST(request: NextRequest) {
         name: mapped.name,
         company: mapped.company,
         email: mapped.email,
-        phone: normalizePhone(mapped.phone),
+        phone: mapped.phone ? normalizePhone(mapped.phone) : "",
         department: mapped.department ?? "",
         title: mapped.title ?? "",
       });
