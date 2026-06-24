@@ -47,6 +47,32 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function DELETE(request: NextRequest) {
+  const adminOrResponse = await requireAdmin("super_admin");
+  if (adminOrResponse instanceof NextResponse) return adminOrResponse;
+
+  try {
+    const { ids } = await request.json() as { ids: string[] };
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ error: "삭제할 항목을 선택해주세요." }, { status: 400 });
+    }
+
+    const supabase = createServerClient();
+    const { error } = await supabase
+      .from("registrants")
+      .delete()
+      .in("id", ids);
+
+    if (error) throw error;
+
+    return NextResponse.json({ deleted: ids.length });
+  } catch (err) {
+    console.error("[admin/registrants DELETE]", err);
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   const adminOrResponse = await requireAdmin("super_admin");
   if (adminOrResponse instanceof NextResponse) return adminOrResponse;

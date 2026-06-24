@@ -198,22 +198,19 @@ export default function AdminRegistrantsPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [loading, setLoading] = useState(false);
-  const [adminRole, setAdminRole] = useState<string>("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [pageSize, setPageSize] = useState(20);
   const [importOpen, setImportOpen] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
-  // 관리자 역할 확인 (레이아웃에서 받을 수 없으므로 API 호출로 확인)
   useEffect(() => {
-    fetch("/api/admin/stats")
+    fetch("/api/admin/me")
       .then((r) => r.json())
-      .then(() => {
-        // 성공하면 어드민임. role 확인을 위해 별도 엔드포인트 없이 쿠키에서 판단
-        // 실제로는 서버 컴포넌트로 전환하거나 별도 /api/admin/me 엔드포인트 추가 권장
-      });
-    // 임시: super_admin 기능 버튼은 API에서 403 반환 시 숨기는 방식으로 처리
-    setAdminRole("unknown");
+      .then((d) => setIsSuperAdmin(d.role === "super_admin"))
+      .catch(() => {});
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -260,8 +257,41 @@ export default function AdminRegistrantsPage() {
   async function handleDelete(id: string, name: string) {
     if (!confirm(`"${name}"을 정말 삭제하시겠습니까?`)) return;
     const res = await fetch(`/api/admin/registrants/${id}`, { method: "DELETE" });
-    if (res.ok) fetchData();
+    if (res.ok) { setSelected((prev) => { const next = new Set(prev); next.delete(id); return next; }); fetchData(); }
     else alert("삭제에 실패했습니다.");
+  }
+
+  async function handleBulkDelete() {
+    if (selected.size === 0) return;
+    if (!confirm(`선택한 ${selected.size}명을 정말 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/admin/registrants", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selected) }),
+      });
+      if (res.ok) { setSelected(new Set()); fetchData(); }
+      else alert("삭제에 실패했습니다.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function toggleAll() {
+    if (selected.size === registrants.length && registrants.length > 0) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(registrants.map((r) => r.id)));
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   }
 
   function handleExport() {
@@ -295,6 +325,15 @@ export default function AdminRegistrantsPage() {
           <p className="text-sm text-gray-500 mt-0.5">전체 {total.toLocaleString()}명</p>
         </div>
         <div className="flex gap-2">
+          {isSuperAdmin && selected.size > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              disabled={deleting}
+              className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              {deleting ? "삭제 중..." : `선택 삭제 (${selected.size}명)`}
+            </button>
+          )}
           <button
             onClick={() => setImportOpen(true)}
             className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
@@ -363,6 +402,16 @@ export default function AdminRegistrantsPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 text-xs">
               <tr>
+                {isSuperAdmin && (
+                  <th className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 accent-red-500 cursor-pointer"
+                      checked={registrants.length > 0 && selected.size === registrants.length}
+                      onChange={toggleAll}
+                    />
+                  </th>
+                )}
                 <SortTh col="name"       label="이름"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 <SortTh col="company"    label="회사"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
                 <SortTh col="email"      label="이메일" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
@@ -378,19 +427,29 @@ export default function AdminRegistrantsPage() {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={isSuperAdmin ? 11 : 10} className="px-4 py-8 text-center text-gray-400">
                     로딩 중...
                   </td>
                 </tr>
               ) : registrants.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={isSuperAdmin ? 11 : 10} className="px-4 py-8 text-center text-gray-400">
                     등록자가 없습니다.
                   </td>
                 </tr>
               ) : (
                 registrants.map((r) => (
-                  <tr key={r.id} className="hover:bg-gray-50">
+                  <tr key={r.id} className={`hover:bg-gray-50 ${selected.has(r.id) ? "bg-red-50" : ""}`}>
+                    {isSuperAdmin && (
+                      <td className="px-4 py-2.5">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 accent-red-500 cursor-pointer"
+                          checked={selected.has(r.id)}
+                          onChange={() => toggleOne(r.id)}
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-2.5 font-medium text-gray-900">{r.name}</td>
                     <td className="px-4 py-2.5 text-gray-600">{r.company}</td>
                     <td className="px-4 py-2.5 text-gray-600">{r.email}</td>
