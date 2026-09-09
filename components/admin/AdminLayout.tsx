@@ -15,6 +15,7 @@ const navItems = [
   { href: "/admin/dashboard", label: "대시보드", roles: ["super_admin", "manager"] },
   { href: "/admin/registrants", label: "등록자 관리", roles: ["super_admin", "manager"] },
   { href: "/admin/viewers", label: "시청 현황", roles: ["super_admin", "manager"] },
+  { href: "/admin/chat", label: "채팅 관리", roles: ["super_admin", "manager"] },
   { href: "/admin/settings", label: "행사 설정", roles: ["super_admin"] },
   { href: "/admin/users", label: "관리자 계정", roles: ["super_admin"] },
 ];
@@ -43,7 +44,7 @@ export default function AdminLayout({
       {/* 사이드바 */}
       <aside className="w-56 bg-gray-900 text-white flex flex-col">
         <div className="px-5 py-5 border-b border-gray-700">
-          <h1 className="font-bold text-sm text-white">SAP NOW AI Tour KOREA</h1>
+          <h1 className="font-bold text-sm text-white">SAP Business AI 실전가이드 웨비나</h1>
           <p className="text-xs text-gray-400 mt-0.5">어드민</p>
         </div>
 

@@ -81,9 +81,9 @@ export default function AdminSettingsPage() {
   }
 
   const fields: { name: keyof EventSettings; label: string; type?: string; placeholder?: string }[] = [
-    { name: "event_name", label: "행사명", placeholder: "SAP NOW AI Tour KOREA" },
+    { name: "event_name", label: "행사명", placeholder: "SAP Business AI 실전가이드 웨비나" },
     { name: "event_date", label: "행사 일자", type: "date" },
-    { name: "stream_url", label: "IVS 재생 URL", placeholder: "https://xxxx.live-video.net/api/video/v1/....m3u8" },
+    { name: "stream_url", label: "Vimeo 재생 URL", placeholder: "https://vimeo.com/123456789 또는 https://vimeo.com/123456789/abcdef1234" },
     { name: "video_open_at", label: "영상 오픈 시간", type: "datetime-local" },
     { name: "video_close_at", label: "영상 마감 시간", type: "datetime-local" },
     { name: "survey_url", label: "설문 URL", placeholder: "https://..." },

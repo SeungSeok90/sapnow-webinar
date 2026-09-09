@@ -48,6 +48,13 @@ export interface AdminUser {
   updated_at: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  registrant_id: string;
+  message: string;
+  created_at: string;
+}
+
 export interface EventSettings {
   id: number;
   event_name: string;

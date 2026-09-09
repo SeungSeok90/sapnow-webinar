@@ -15,7 +15,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">SAP NOW AI Tour KOREA</h1>
+          <h1 className="text-3xl font-bold text-white">SAP Business AI 실전가이드 웨비나</h1>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">

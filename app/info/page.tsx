@@ -5,7 +5,7 @@ import { INFO_CATEGORIES } from "@/content/info-categories";
 export default function InfoPage() {
   return (
     <main className="min-h-screen bg-gray-50">
-      <InfoHeader title="SAP NOW AI Tour KOREA" />
+      <InfoHeader title="SAP Business AI 실전가이드 웨비나" />
 
       <div className="mx-auto max-w-[480px] space-y-3 px-4 py-6">
         {INFO_CATEGORIES.map((category) => {

@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import { buildVimeoEmbedUrl } from "@/lib/utils/vimeo";
 
 interface VideoPlayerProps {
   streamUrl: string;
 }
 
 export default function VideoPlayer({ streamUrl }: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const playerRef = useRef<unknown>(null);
   const elapsedRef = useRef(0);
   const lastTickRef = useRef<number>(Date.now());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -62,39 +61,6 @@ export default function VideoPlayer({ streamUrl }: VideoPlayerProps) {
     }
   }, []);
 
-  // IVS 플레이어 초기화
-  useEffect(() => {
-    if (!streamUrl || !videoRef.current) return;
-
-    async function initPlayer() {
-      const { create, isPlayerSupported } = await import("amazon-ivs-player");
-
-      if (!isPlayerSupported) {
-        console.warn("IVS player not supported in this browser");
-        return;
-      }
-
-      const player = create({
-        wasmWorker: "/ivs/amazon-ivs-wasmworker.min.js",
-        wasmBinary: "/ivs/amazon-ivs-wasmworker.min.wasm",
-      });
-
-      player.attachHTMLVideoElement(videoRef.current!);
-      player.load(streamUrl);
-      player.play();
-      playerRef.current = player;
-    }
-
-    initPlayer().catch(console.error);
-
-    return () => {
-      if (playerRef.current) {
-        (playerRef.current as { delete: () => void }).delete();
-        playerRef.current = null;
-      }
-    };
-  }, [streamUrl]);
-
   // 최초 접속 기록
   useEffect(() => {
     fetch("/api/watch/access", { method: "POST" }).catch(console.error);
@@ -134,13 +100,26 @@ export default function VideoPlayer({ streamUrl }: VideoPlayerProps) {
     return () => window.removeEventListener("pagehide", handleBeforeUnload);
   }, [sendBeacon]);
 
+  const embedUrl = buildVimeoEmbedUrl(streamUrl);
+
+  if (!embedUrl) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="text-6xl mb-6">🎬</div>
+        <h2 className="text-2xl font-bold mb-2">영상 준비 중</h2>
+        <p className="text-gray-400">잠시 후 영상이 제공될 예정입니다.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full rounded-lg bg-black"
-        playsInline
-        controls
+      <iframe
+        src={embedUrl}
+        className="absolute inset-0 h-full w-full rounded-lg"
+        allow="autoplay; fullscreen; picture-in-picture; clipboard-write"
+        allowFullScreen
+        title="webinar video"
       />
     </div>
   );

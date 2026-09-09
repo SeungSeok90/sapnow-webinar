@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SAP NOW AI Tour KOREA",
+  title: "SAP Business AI 실전가이드 웨비나",
   description: "온라인 영상 시청 플랫폼",
   icons: {
     icon: "/icon.png",

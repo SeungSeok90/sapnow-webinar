@@ -1,5 +1,5 @@
 -- ============================================================
--- SAP NOW 웨비나 플랫폼 — Supabase Schema
+-- SAP Business AI 실전가이드 웨비나 플랫폼 — Supabase Schema
 -- ============================================================
 
 -- ──────────────────────────────────────
@@ -125,7 +125,20 @@ VALUES (1)
 ON CONFLICT (id) DO NOTHING;
 
 -- ──────────────────────────────────────
--- 6. Heartbeat RPC 함수
+-- 6. 채팅 메시지 테이블
+-- ──────────────────────────────────────
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  registrant_id UUID NOT NULL REFERENCES registrants (id) ON DELETE CASCADE,
+  message       TEXT NOT NULL,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_messages_created    ON chat_messages (created_at);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_registrant ON chat_messages (registrant_id);
+
+-- ──────────────────────────────────────
+-- 7. Heartbeat RPC 함수
 -- ──────────────────────────────────────
 CREATE OR REPLACE FUNCTION increment_watch_seconds(
   p_registrant_id UUID,
@@ -143,16 +156,17 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ──────────────────────────────────────
--- 7. RLS 활성화
+-- 8. RLS 활성화
 -- ──────────────────────────────────────
 ALTER TABLE registrants    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_logs     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE watch_logs     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_users    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chat_messages  ENABLE ROW LEVEL SECURITY;
 
 -- ──────────────────────────────────────
--- 7. RLS 정책: anon / authenticated 전면 차단
+-- 9. RLS 정책: anon / authenticated 전면 차단
 --    service_role은 RLS를 bypass하므로 API Route에서 정상 동작
 -- ──────────────────────────────────────
 DROP POLICY IF EXISTS "deny_all_registrants"    ON registrants;
@@ -160,6 +174,7 @@ DROP POLICY IF EXISTS "deny_all_login_logs"     ON login_logs;
 DROP POLICY IF EXISTS "deny_all_watch_logs"     ON watch_logs;
 DROP POLICY IF EXISTS "deny_all_admin_users"    ON admin_users;
 DROP POLICY IF EXISTS "deny_all_event_settings" ON event_settings;
+DROP POLICY IF EXISTS "deny_all_chat_messages"  ON chat_messages;
 
 CREATE POLICY "deny_all_registrants"
   ON registrants FOR ALL TO anon, authenticated USING (false);
@@ -175,3 +190,6 @@ CREATE POLICY "deny_all_admin_users"
 
 CREATE POLICY "deny_all_event_settings"
   ON event_settings FOR ALL TO anon, authenticated USING (false);
+
+CREATE POLICY "deny_all_chat_messages"
+  ON chat_messages FOR ALL TO anon, authenticated USING (false);

@@ -84,7 +84,7 @@ export function exportFullReport(
   const viewRate = total > 0 ? Math.round((viewers / total) * 100) : 0;
 
   const summaryAoa = [
-    ["SAP NOW AI Tour KOREA Report"],
+    ["SAP Business AI 실전가이드 웨비나 Report"],
     [],
     ["행사명", settings?.event_name ?? ""],
     ["행사일", settings?.event_date ?? ""],

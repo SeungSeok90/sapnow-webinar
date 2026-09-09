@@ -70,6 +70,28 @@ export interface ViewerRow {
   status: ViewStatus;
 }
 
+export interface ChatMessageView {
+  id: string;
+  alias: string;
+  message: string;
+  createdAt: string;
+  isMine: boolean;
+}
+
+export interface ChatSendRequest {
+  message: string;
+}
+
+export interface AdminChatMessageView {
+  id: string;
+  registrantId: string;
+  name: string;
+  company: string;
+  email: string;
+  message: string;
+  createdAt: string;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;

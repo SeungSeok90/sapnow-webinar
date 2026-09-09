@@ -14,7 +14,7 @@ export default function RegisterPage() {
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-3xl font-bold text-white">SAP NOW AI Tour KOREA</h1>
+          <h1 className="text-3xl font-bold text-white">SAP Business AI 실전가이드 웨비나</h1>
         </div>
       </div>
 
