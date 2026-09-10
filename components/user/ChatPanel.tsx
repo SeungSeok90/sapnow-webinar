@@ -7,6 +7,13 @@ const POLL_INTERVAL_MS = 2500;
 const MAX_MESSAGE_LENGTH = 300;
 const NEAR_BOTTOM_THRESHOLD_PX = 80;
 
+function formatMessageTime(createdAt: string): string {
+  return new Date(createdAt).toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessageView[]>([]);
   const [input, setInput] = useState("");
@@ -106,7 +113,9 @@ export default function ChatPanel() {
               key={m.id}
               className={`flex flex-col ${m.isMine ? "items-end" : "items-start"}`}
             >
-              <span className="mb-0.5 text-xs text-gray-500">{m.alias}</span>
+              <span className="mb-0.5 text-xs text-gray-500">
+                {m.alias} · {formatMessageTime(m.createdAt)}
+              </span>
               <div
                 className={`max-w-[85%] break-words rounded-2xl px-3 py-1.5 text-sm ${
                   m.isMine
