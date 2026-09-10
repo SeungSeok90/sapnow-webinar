@@ -12,7 +12,7 @@ export async function DELETE(
   try {
     const supabase = createServerClient();
     const { error } = await supabase
-      .from("chat_messages")
+      .from("sapnow_chat_messages")
       .delete()
       .eq("id", params.id);
 

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient();
 
     const baseQuery = supabase
-      .from("chat_messages")
+      .from("sapnow_chat_messages")
       .select("id, registrant_id, message, created_at");
 
     const { data: rowsRaw, error } = after
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createServerClient();
     const { data, error } = await supabase
-      .from("chat_messages")
+      .from("sapnow_chat_messages")
       .insert({ registrant_id: userOrResponse.registrantId, message })
       .select("id, registrant_id, message, created_at")
       .single();

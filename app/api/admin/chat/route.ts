@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient();
 
     const baseQuery = supabase
-      .from("chat_messages")
+      .from("sapnow_chat_messages")
       .select("id, registrant_id, message, created_at");
 
     const { data: messagesRaw, error: msgError } = after

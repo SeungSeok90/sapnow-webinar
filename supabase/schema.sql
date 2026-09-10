@@ -127,15 +127,15 @@ ON CONFLICT (id) DO NOTHING;
 -- ──────────────────────────────────────
 -- 6. 채팅 메시지 테이블
 -- ──────────────────────────────────────
-CREATE TABLE IF NOT EXISTS chat_messages (
+CREATE TABLE IF NOT EXISTS sapnow_chat_messages (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   registrant_id UUID NOT NULL REFERENCES registrants (id) ON DELETE CASCADE,
   message       TEXT NOT NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_chat_messages_created    ON chat_messages (created_at);
-CREATE INDEX IF NOT EXISTS idx_chat_messages_registrant ON chat_messages (registrant_id);
+CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_created    ON sapnow_chat_messages (created_at);
+CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_registrant ON sapnow_chat_messages (registrant_id);
 
 -- ──────────────────────────────────────
 -- 7. Heartbeat RPC 함수
@@ -163,7 +163,7 @@ ALTER TABLE login_logs     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE watch_logs     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_users    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE chat_messages  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sapnow_chat_messages  ENABLE ROW LEVEL SECURITY;
 
 -- ──────────────────────────────────────
 -- 9. RLS 정책: anon / authenticated 전면 차단
@@ -174,7 +174,7 @@ DROP POLICY IF EXISTS "deny_all_login_logs"     ON login_logs;
 DROP POLICY IF EXISTS "deny_all_watch_logs"     ON watch_logs;
 DROP POLICY IF EXISTS "deny_all_admin_users"    ON admin_users;
 DROP POLICY IF EXISTS "deny_all_event_settings" ON event_settings;
-DROP POLICY IF EXISTS "deny_all_chat_messages"  ON chat_messages;
+DROP POLICY IF EXISTS "deny_all_sapnow_chat_messages"  ON sapnow_chat_messages;
 
 CREATE POLICY "deny_all_registrants"
   ON registrants FOR ALL TO anon, authenticated USING (false);
@@ -191,5 +191,5 @@ CREATE POLICY "deny_all_admin_users"
 CREATE POLICY "deny_all_event_settings"
   ON event_settings FOR ALL TO anon, authenticated USING (false);
 
-CREATE POLICY "deny_all_chat_messages"
-  ON chat_messages FOR ALL TO anon, authenticated USING (false);
+CREATE POLICY "deny_all_sapnow_chat_messages"
+  ON sapnow_chat_messages FOR ALL TO anon, authenticated USING (false);
