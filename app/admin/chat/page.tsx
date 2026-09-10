@@ -67,9 +67,17 @@ export default function AdminChatPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">채팅 관리</h1>
-        <p className="text-sm text-gray-500 mt-0.5">총 {messages.length.toLocaleString()}건</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">채팅 관리</h1>
+          <p className="text-sm text-gray-500 mt-0.5">총 {messages.length.toLocaleString()}건</p>
+        </div>
+        <a
+          href="/api/admin/export/chat"
+          className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
+        >
+          엑셀 다운로드
+        </a>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

@@ -1,6 +1,6 @@
 import * as XLSX from "xlsx";
 import type { Registrant, EventSettings } from "@/types/database";
-import type { ViewerRow } from "@/types/api";
+import type { ViewerRow, AdminChatMessageView } from "@/types/api";
 
 export function exportRegistrantsToExcel(
   registrants: Registrant[]
@@ -50,6 +50,23 @@ export function exportViewersToExcel(viewers: ViewerRow[]): Buffer {
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "시청현황");
+
+  return Buffer.from(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+}
+
+export function exportChatMessagesToExcel(messages: AdminChatMessageView[]): Buffer {
+  const rows = messages.map((m) => ({
+    시간: new Date(m.createdAt).toLocaleString("ko-KR"),
+    이름: m.name,
+    회사명: m.company,
+    이메일: m.email,
+    메시지: m.message,
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws["!cols"] = [{ wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 28 }, { wch: 60 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "채팅내역");
 
   return Buffer.from(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
 }
