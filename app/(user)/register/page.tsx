@@ -6,7 +6,7 @@ export default function RegisterPage() {
     <main className="min-h-screen bg-gray-50">
       <div className="relative h-[150px] w-full overflow-hidden">
         <Image
-          src="/login-background.png"
+          src="/main-background.png"
           alt=""
           fill
           priority

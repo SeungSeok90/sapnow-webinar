@@ -49,7 +49,7 @@ export default async function WatchPage() {
   return (
     <div className="relative min-h-screen text-white">
       <Image
-        src="/login-background.png"
+        src="/main-background.png"
         alt=""
         fill
         priority

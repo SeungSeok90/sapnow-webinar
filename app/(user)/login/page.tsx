@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <main className="relative min-h-screen flex items-center justify-center px-4">
       <Image
-        src="/login-background.png"
+        src="/main-background.png"
         alt=""
         fill
         priority
