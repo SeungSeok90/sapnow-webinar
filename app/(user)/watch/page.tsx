@@ -9,6 +9,7 @@ import ChatPanel from "@/components/user/ChatPanel";
 import LogoutButton from "@/components/user/LogoutButton";
 import type { UserSessionData } from "@/types/session";
 import type { EventSettings } from "@/types/database";
+import { formatKST, getEntryOpenAt } from "@/lib/utils/time";
 
 export default async function WatchPage() {
   const session = await getIronSession<{ user?: UserSessionData }>(
@@ -32,6 +33,11 @@ export default async function WatchPage() {
     settings = data;
   } catch {
     // 설정 로드 실패 시 환경변수 fallback 사용
+  }
+
+  const entryOpenAt = getEntryOpenAt(settings?.video_open_at ?? null);
+  if (entryOpenAt && Date.now() < entryOpenAt.getTime()) {
+    redirect("/login");
   }
 
   const streamUrl = settings?.stream_url || "";
@@ -90,7 +96,7 @@ export default async function WatchPage() {
                 <div className="text-6xl mb-6">⏰</div>
                 <h2 className="text-2xl font-bold mb-2">영상 시청 준비 중</h2>
                 <p className="text-gray-400">
-                  {videoOpenAt?.toLocaleString("ko-KR")}에 시작됩니다.
+                  {formatKST(videoOpenAt)}에 시작됩니다.
                 </p>
               </div>
             ) : isAfterClose ? (
@@ -98,7 +104,7 @@ export default async function WatchPage() {
                 <div className="text-6xl mb-6">🔒</div>
                 <h2 className="text-2xl font-bold mb-2">시청 가능 시간이 종료되었습니다</h2>
                 <p className="text-gray-400">
-                  시청 마감: {videoCloseAt?.toLocaleString("ko-KR")}
+                  시청 마감: {formatKST(videoCloseAt)}
                 </p>
               </div>
             ) : streamUrl ? (
