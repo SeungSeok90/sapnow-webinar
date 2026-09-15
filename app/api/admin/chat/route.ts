@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const baseQuery = supabase
       .from("sapnow_chat_messages")
-      .select("id, registrant_id, message, created_at");
+      .select("id, registrant_id, message, created_at, is_hidden");
 
     const { data: messagesRaw, error: msgError } = after
       ? await baseQuery
@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
         email: registrant?.email ?? "",
         message: row.message,
         createdAt: row.created_at,
+        isHidden: row.is_hidden,
       };
     });
 

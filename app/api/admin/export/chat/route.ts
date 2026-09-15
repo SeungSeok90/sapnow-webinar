@@ -13,7 +13,7 @@ export async function GET() {
 
     const { data: rows, error } = await supabase
       .from("sapnow_chat_messages")
-      .select("id, registrant_id, message, created_at")
+      .select("id, registrant_id, message, created_at, is_hidden")
       .order("created_at", { ascending: true });
 
     if (error) throw error;
@@ -40,6 +40,7 @@ export async function GET() {
         email: registrant?.email ?? "",
         message: row.message,
         createdAt: row.created_at,
+        isHidden: row.is_hidden,
       };
     });
 

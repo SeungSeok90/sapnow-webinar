@@ -90,6 +90,7 @@ export interface AdminChatMessageView {
   email: string;
   message: string;
   createdAt: string;
+  isHidden: boolean;
 }
 
 export interface PaginatedResponse<T> {

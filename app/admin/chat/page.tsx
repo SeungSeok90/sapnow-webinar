@@ -10,6 +10,7 @@ export default function AdminChatPage() {
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const lastCreatedAtRef = useRef<string | null>(null);
 
@@ -61,6 +62,24 @@ export default function AdminChatPage() {
     }
   }
 
+  async function handleToggleHide(id: string, nextHidden: boolean) {
+    setTogglingId(id);
+    try {
+      const res = await fetch(`/api/admin/chat/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isHidden: nextHidden }),
+      });
+      if (res.ok) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, isHidden: nextHidden } : m))
+        );
+      }
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
   const sorted = [...messages].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -90,25 +109,25 @@ export default function AdminChatPage() {
                 <th className="text-left px-4 py-3">회사</th>
                 <th className="text-left px-4 py-3">이메일</th>
                 <th className="text-left px-4 py-3">메시지</th>
-                {isSuperAdmin && <th className="text-left px-4 py-3">관리</th>}
+                <th className="text-left px-4 py-3">관리</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan={isSuperAdmin ? 6 : 5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                     로딩 중...
                   </td>
                 </tr>
               ) : sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={isSuperAdmin ? 6 : 5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                     채팅 메시지가 없습니다.
                   </td>
                 </tr>
               ) : (
                 sorted.map((m) => (
-                  <tr key={m.id} className="hover:bg-gray-50">
+                  <tr key={m.id} className={`hover:bg-gray-50 ${m.isHidden ? "bg-gray-50 text-gray-400" : ""}`}>
                     <td className="px-4 py-2.5 text-gray-400 text-xs whitespace-nowrap">
                       {new Date(m.createdAt).toLocaleString("ko-KR", {
                         hour: "2-digit",
@@ -119,9 +138,23 @@ export default function AdminChatPage() {
                     <td className="px-4 py-2.5 font-medium text-gray-900 whitespace-nowrap">{m.name}</td>
                     <td className="px-4 py-2.5 text-gray-600 whitespace-nowrap">{m.company}</td>
                     <td className="px-4 py-2.5 text-gray-600 whitespace-nowrap">{m.email}</td>
-                    <td className="px-4 py-2.5 text-gray-700 break-words max-w-md">{m.message}</td>
-                    {isSuperAdmin && (
-                      <td className="px-4 py-2.5">
+                    <td className="px-4 py-2.5 text-gray-700 break-words max-w-md">
+                      {m.isHidden && (
+                        <span className="inline-block mr-1.5 px-1.5 py-0.5 text-[10px] rounded bg-gray-200 text-gray-500 align-middle">
+                          숨김
+                        </span>
+                      )}
+                      {m.message}
+                    </td>
+                    <td className="px-4 py-2.5 whitespace-nowrap space-x-2">
+                      <button
+                        onClick={() => handleToggleHide(m.id, !m.isHidden)}
+                        disabled={togglingId === m.id}
+                        className="text-xs text-gray-600 hover:text-gray-900 disabled:opacity-50"
+                      >
+                        {m.isHidden ? "숨김해제" : "숨김"}
+                      </button>
+                      {isSuperAdmin && (
                         <button
                           onClick={() => handleDelete(m.id)}
                           disabled={deletingId === m.id}
@@ -129,8 +162,8 @@ export default function AdminChatPage() {
                         >
                           삭제
                         </button>
-                      </td>
-                    )}
+                      )}
+                    </td>
                   </tr>
                 ))
               )}

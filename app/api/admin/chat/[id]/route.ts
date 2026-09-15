@@ -2,6 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth/admin-guard";
 import { createServerClient } from "@/lib/supabase/server";
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const adminOrResponse = await requireAdmin();
+  if (adminOrResponse instanceof NextResponse) return adminOrResponse;
+
+  try {
+    const body = await request.json();
+    const isHidden = Boolean(body?.isHidden);
+
+    const supabase = createServerClient();
+    const { error } = await supabase
+      .from("sapnow_chat_messages")
+      .update({ is_hidden: isHidden })
+      .eq("id", params.id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[admin/chat PATCH]", err);
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

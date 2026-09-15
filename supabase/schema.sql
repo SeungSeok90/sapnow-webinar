@@ -131,8 +131,11 @@ CREATE TABLE IF NOT EXISTS sapnow_chat_messages (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   registrant_id UUID NOT NULL REFERENCES registrants (id) ON DELETE CASCADE,
   message       TEXT NOT NULL,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  is_hidden     BOOLEAN NOT NULL DEFAULT false
 );
+
+ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT false;
 
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_created    ON sapnow_chat_messages (created_at);
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_registrant ON sapnow_chat_messages (registrant_id);
