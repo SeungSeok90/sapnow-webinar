@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import type { Registrant, EventSettings } from "@/types/database";
 import type { ViewerRow, AdminChatMessageView } from "@/types/api";
+import { formatKST, getKSTDateStamp } from "@/lib/utils/time";
 
 export function exportRegistrantsToExcel(
   registrants: Registrant[]
@@ -13,11 +14,11 @@ export function exportRegistrantsToExcel(
     부서: r.department ?? "",
     직함: r.title ?? "",
     개인정보동의: r.privacy_agreed ? "동의" : "미동의",
-    개인정보동의일시: r.privacy_agreed_at ?? "",
+    개인정보동의일시: formatKST(r.privacy_agreed_at),
     프로필공개동의: r.profile_public_agreed ? "동의" : "미동의",
     마케팅채널: r.marketing_channel,
-    마케팅동의일시: r.marketing_agreed_at ?? "",
-    등록일시: r.created_at,
+    마케팅동의일시: formatKST(r.marketing_agreed_at),
+    등록일시: formatKST(r.created_at),
   }));
 
   const ws = XLSX.utils.json_to_sheet(rows);
@@ -40,8 +41,8 @@ export function exportViewersToExcel(viewers: ViewerRow[]): Buffer {
     회사명: v.company,
     이메일: v.email,
     휴대폰: v.phone,
-    최초접속: v.first_access_at ?? "",
-    최종접속: v.last_access_at ?? "",
+    최초접속: formatKST(v.first_access_at),
+    최종접속: formatKST(v.last_access_at),
     누적시청초: v.total_watch_seconds,
     누적시청분: Math.floor(v.total_watch_seconds / 60),
     시청상태: statusLabel[v.status] ?? "",
@@ -56,7 +57,7 @@ export function exportViewersToExcel(viewers: ViewerRow[]): Buffer {
 
 export function exportChatMessagesToExcel(messages: AdminChatMessageView[]): Buffer {
   const rows = messages.map((m) => ({
-    시간: new Date(m.createdAt).toLocaleString("ko-KR"),
+    시간: formatKST(m.createdAt),
     이름: m.name,
     회사명: m.company,
     이메일: m.email,
@@ -72,8 +73,7 @@ export function exportChatMessagesToExcel(messages: AdminChatMessageView[]): Buf
 }
 
 export function getExcelFileName(prefix: string): string {
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  return `${prefix}_${date}.xlsx`;
+  return `${prefix}_${getKSTDateStamp()}.xlsx`;
 }
 
 type WatchLogRow = {
@@ -105,7 +105,7 @@ export function exportFullReport(
     [],
     ["행사명", settings?.event_name ?? ""],
     ["행사일", settings?.event_date ?? ""],
-    ["리포트 생성 일시", new Date().toLocaleString("ko-KR")],
+    ["리포트 생성 일시", formatKST(new Date())],
     [],
     ["[ 등록 현황 ]"],
     ["총 등록자", total],
@@ -133,7 +133,7 @@ export function exportFullReport(
     개인정보동의: r.privacy_agreed ? "동의" : "미동의",
     프로필공개동의: r.profile_public_agreed ? "동의" : "미동의",
     마케팅채널: r.marketing_channel,
-    등록일시: r.created_at ? new Date(r.created_at).toLocaleString("ko-KR") : "",
+    등록일시: formatKST(r.created_at),
   }));
   const regSheet = XLSX.utils.json_to_sheet(regRows);
   regSheet["!cols"] = [
@@ -157,8 +157,8 @@ export function exportFullReport(
       회사명: r.company,
       이메일: r.email,
       휴대폰: r.phone,
-      최초접속: log?.first_access_at ? new Date(log.first_access_at).toLocaleString("ko-KR") : "-",
-      최종접속: log?.last_access_at ? new Date(log.last_access_at).toLocaleString("ko-KR") : "-",
+      최초접속: formatKST(log?.first_access_at, undefined, "-"),
+      최종접속: formatKST(log?.last_access_at, undefined, "-"),
       누적시청분: Math.floor(secs / 60),
       시청상태: status,
     };

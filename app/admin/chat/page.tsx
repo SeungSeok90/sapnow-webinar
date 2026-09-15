@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AdminChatMessageView } from "@/types/api";
+import { formatKSTTime } from "@/lib/utils/time";
 
 const POLL_INTERVAL_MS = 3000;
 
@@ -129,7 +130,7 @@ export default function AdminChatPage() {
                 sorted.map((m) => (
                   <tr key={m.id} className={`hover:bg-gray-50 ${m.isHidden ? "bg-gray-50 text-gray-400" : ""}`}>
                     <td className="px-4 py-2.5 text-gray-400 text-xs whitespace-nowrap">
-                      {new Date(m.createdAt).toLocaleString("ko-KR", {
+                      {formatKSTTime(m.createdAt, {
                         hour: "2-digit",
                         minute: "2-digit",
                         second: "2-digit",

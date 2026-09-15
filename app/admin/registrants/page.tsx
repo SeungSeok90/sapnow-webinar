@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { Registrant } from "@/types/database";
 import Pagination from "@/components/admin/Pagination";
+import { formatKST } from "@/lib/utils/time";
 
 type ImportResult = {
   inserted: number;
@@ -467,7 +468,7 @@ export default function AdminRegistrantsPage() {
                       <MarketingChannelBadge channel={r.marketing_channel} />
                     </td>
                     <td className="px-4 py-2.5 text-gray-400 text-xs">
-                      {new Date(r.created_at).toLocaleString("ko-KR", {
+                      {formatKST(r.created_at, {
                         year: "2-digit",
                         month: "2-digit",
                         day: "2-digit",

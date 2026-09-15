@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import type { ViewerRow, ViewStatus } from "@/types/api";
 import Pagination from "@/components/admin/Pagination";
+import { formatKST } from "@/lib/utils/time";
 
 type SortDir = "asc" | "desc";
 
@@ -204,14 +205,10 @@ export default function AdminViewersPage() {
                     <td className="px-4 py-2.5 text-gray-600">{v.company}</td>
                     <td className="px-4 py-2.5 text-gray-600">{v.email}</td>
                     <td className="px-4 py-2.5 text-gray-400 text-xs">
-                      {v.first_access_at
-                        ? new Date(v.first_access_at).toLocaleString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-                        : "-"}
+                      {formatKST(v.first_access_at, { hour: "2-digit", minute: "2-digit", second: "2-digit" }, "-")}
                     </td>
                     <td className="px-4 py-2.5 text-gray-400 text-xs">
-                      {v.last_access_at
-                        ? new Date(v.last_access_at).toLocaleString("ko-KR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-                        : "-"}
+                      {formatKST(v.last_access_at, { hour: "2-digit", minute: "2-digit", second: "2-digit" }, "-")}
                     </td>
                     <td className="px-4 py-2.5 text-gray-600">
                       {formatSeconds(v.total_watch_seconds)}

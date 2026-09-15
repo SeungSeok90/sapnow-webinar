@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatKST } from "@/lib/utils/time";
 
 interface AdminUser {
   id: string;
@@ -154,7 +155,7 @@ export default function AdminUsersPage() {
                     </button>
                   </td>
                   <td className="px-4 py-2.5 text-gray-400 text-xs">
-                    {u.last_login_at ? new Date(u.last_login_at).toLocaleString("ko-KR") : "-"}
+                    {formatKST(u.last_login_at, undefined, "-")}
                   </td>
                   <td className="px-4 py-2.5 text-right">
                     <button onClick={() => handleDelete(u.id, u.name)}

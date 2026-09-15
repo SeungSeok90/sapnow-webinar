@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import StatCard from "@/components/admin/StatCard";
 import type { DashboardStats } from "@/types/api";
+import { formatKST } from "@/lib/utils/time";
 
 interface RecentRegistrant {
   id: string;
@@ -158,7 +159,7 @@ export default function AdminDashboardPage() {
                   <td className="px-4 py-2 font-medium">{r.name}</td>
                   <td className="px-4 py-2 text-gray-500">{r.company}</td>
                   <td className="px-4 py-2 text-gray-400">
-                    {new Date(r.created_at).toLocaleString("ko-KR", {
+                    {formatKST(r.created_at, {
                       month: "2-digit",
                       day: "2-digit",
                       hour: "2-digit",
