@@ -16,7 +16,11 @@ export async function PATCH(
     const supabase = createServerClient();
     const { error } = await supabase
       .from("sapnow_chat_messages")
-      .update({ is_hidden: isHidden })
+      .update(
+        isHidden
+          ? { is_hidden: true, hidden_at: new Date().toISOString() }
+          : { is_hidden: false }
+      )
       .eq("id", params.id);
 
     if (error) throw error;

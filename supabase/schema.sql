@@ -132,13 +132,16 @@ CREATE TABLE IF NOT EXISTS sapnow_chat_messages (
   registrant_id UUID NOT NULL REFERENCES registrants (id) ON DELETE CASCADE,
   message       TEXT NOT NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  is_hidden     BOOLEAN NOT NULL DEFAULT false
+  is_hidden     BOOLEAN NOT NULL DEFAULT false,
+  hidden_at     TIMESTAMPTZ
 );
 
 ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ;
 
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_created    ON sapnow_chat_messages (created_at);
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_registrant ON sapnow_chat_messages (registrant_id);
+CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_hidden_at  ON sapnow_chat_messages (hidden_at) WHERE is_hidden;
 
 -- ──────────────────────────────────────
 -- 7. Heartbeat RPC 함수

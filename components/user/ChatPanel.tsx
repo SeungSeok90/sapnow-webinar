@@ -23,6 +23,7 @@ export default function ChatPanel() {
   const listRef = useRef<HTMLDivElement>(null);
   const lastCreatedAtRef = useRef<string | null>(null);
   const isNearBottomRef = useRef(true);
+  const lastHiddenCheckRef = useRef<string>(new Date().toISOString());
 
   const scrollToBottom = useCallback(() => {
     const el = listRef.current;
@@ -50,6 +51,23 @@ export default function ChatPanel() {
     }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [fetchMessages]);
+
+  const checkHiddenMessages = useCallback(async () => {
+    const params = `?since=${encodeURIComponent(lastHiddenCheckRef.current)}`;
+    const res = await fetch(`/api/chat/messages/hidden${params}`);
+    if (!res.ok) return;
+    const { ids, latest } = (await res.json()) as { ids: string[]; latest: string | null };
+    if (latest) lastHiddenCheckRef.current = latest;
+    if (ids && ids.length > 0) {
+      const hiddenSet = new Set(ids);
+      setMessages((prev) => prev.filter((m) => !hiddenSet.has(m.id)));
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(checkHiddenMessages, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [checkHiddenMessages]);
 
   useEffect(() => {
     if (isNearBottomRef.current) scrollToBottom();
