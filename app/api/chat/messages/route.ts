@@ -7,6 +7,7 @@ import type { ChatMessageView, ChatSendRequest } from "@/types/api";
 const MAX_MESSAGE_LENGTH = 300;
 const INITIAL_LOAD_LIMIT = 50;
 const POLL_LIMIT = 100;
+const HIDDEN_SYNC_LIMIT = 200;
 
 export async function GET(request: NextRequest) {
   const userOrResponse = await requireUser();
@@ -15,6 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const after = searchParams.get("after");
+    const hiddenSince = searchParams.get("hiddenSince");
     const supabase = createServerClient();
 
     const baseQuery = supabase
@@ -22,16 +24,32 @@ export async function GET(request: NextRequest) {
       .select("id, registrant_id, message, created_at")
       .eq("is_hidden", false);
 
-    const { data: rowsRaw, error } = after
-      ? await baseQuery
+    const messagesQuery = after
+      ? baseQuery
           .gt("created_at", after)
           .order("created_at", { ascending: true })
           .limit(POLL_LIMIT)
-      : await baseQuery
+      : baseQuery
           .order("created_at", { ascending: false })
           .limit(INITIAL_LOAD_LIMIT);
 
+    const hiddenQuery = hiddenSince
+      ? supabase
+          .from("sapnow_chat_messages")
+          .select("id, hidden_at")
+          .eq("is_hidden", true)
+          .gt("hidden_at", hiddenSince)
+          .order("hidden_at", { ascending: true })
+          .limit(HIDDEN_SYNC_LIMIT)
+      : null;
+
+    const [{ data: rowsRaw, error }, hiddenResult] = await Promise.all([
+      messagesQuery,
+      hiddenQuery ?? Promise.resolve({ data: [], error: null }),
+    ]);
+
     if (error) throw error;
+    if (hiddenResult.error) throw hiddenResult.error;
 
     const rows = after ? (rowsRaw ?? []) : [...(rowsRaw ?? [])].reverse();
 
@@ -43,7 +61,11 @@ export async function GET(request: NextRequest) {
       isMine: row.registrant_id === userOrResponse.registrantId,
     }));
 
-    return NextResponse.json({ data });
+    const hiddenRows = hiddenResult.data ?? [];
+    const hiddenIds = hiddenRows.map((r) => r.id);
+    const hiddenLatest = hiddenRows.length > 0 ? hiddenRows[hiddenRows.length - 1].hidden_at : null;
+
+    return NextResponse.json({ data, hiddenIds, hiddenLatest });
   } catch (err) {
     console.error("[chat/messages GET]", err);
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
