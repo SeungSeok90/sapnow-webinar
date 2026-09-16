@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { createServerClient } from "@/lib/supabase/server";
 import { userSessionOptions } from "@/lib/session/user";
+import { getAdminSession } from "@/lib/auth/admin-guard";
 import { getClientIp } from "@/lib/utils/device";
 import { formatKST, getEntryOpenAt } from "@/lib/utils/time";
 import type { LoginRequest } from "@/types/api";
@@ -27,8 +28,11 @@ export async function POST(request: NextRequest) {
       .eq("id", 1)
       .single();
 
+    // 관리자는 사전 테스트를 위해 입장 시간 제한을 적용하지 않는다.
+    const admin = await getAdminSession();
+
     const entryOpenAt = getEntryOpenAt(settings?.video_open_at ?? null);
-    if (entryOpenAt && Date.now() < entryOpenAt.getTime()) {
+    if (!admin && entryOpenAt && Date.now() < entryOpenAt.getTime()) {
       const remainingSeconds = Math.ceil((entryOpenAt.getTime() - Date.now()) / 1000);
       return NextResponse.json(
         {

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { createServerClient } from "@/lib/supabase/server";
 import { userSessionOptions } from "@/lib/session/user";
+import { getAdminSession } from "@/lib/auth/admin-guard";
 import VideoPlayer from "@/components/user/VideoPlayer";
 import ChatPanel from "@/components/user/ChatPanel";
 import LogoutButton from "@/components/user/LogoutButton";
@@ -35,8 +36,11 @@ export default async function WatchPage() {
     // 설정 로드 실패 시 환경변수 fallback 사용
   }
 
+  // 관리자는 사전 테스트를 위해 입장 시간 제한을 적용하지 않는다.
+  const admin = await getAdminSession();
+
   const entryOpenAt = getEntryOpenAt(settings?.video_open_at ?? null);
-  if (entryOpenAt && Date.now() < entryOpenAt.getTime()) {
+  if (!admin && entryOpenAt && Date.now() < entryOpenAt.getTime()) {
     redirect("/login");
   }
 
@@ -49,8 +53,9 @@ export default async function WatchPage() {
     ? new Date(settings.video_close_at)
     : null;
   const now = new Date();
-  const isBeforeOpen = videoOpenAt ? now < videoOpenAt : false;
-  const isAfterClose = videoCloseAt ? now > videoCloseAt : false;
+  // 관리자는 사전 테스트를 위해 시청 가능 시간 제한 없이 항상 영상을 볼 수 있다.
+  const isBeforeOpen = !admin && videoOpenAt ? now < videoOpenAt : false;
+  const isAfterClose = !admin && videoCloseAt ? now > videoCloseAt : false;
 
   return (
     <div className="relative min-h-screen text-white">
