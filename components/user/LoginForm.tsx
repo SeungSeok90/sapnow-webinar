@@ -14,9 +14,14 @@ const MAX_RETRY_JITTER_SECONDS = 5;
 
 function formatRemaining(ms: number): string {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+
+  if (days > 0) return `${days}일 ${hours}시간 ${minutes}분`;
+  if (hours > 0) return `${hours}시간 ${minutes}분`;
+  return `${minutes}분 ${seconds}초`;
 }
 
 export default function LoginForm({ entryOpenAt }: LoginFormProps) {
