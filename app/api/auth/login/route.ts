@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       const remainingSeconds = Math.ceil((entryOpenAt.getTime() - Date.now()) / 1000);
       return NextResponse.json(
         {
-          error: `입장 가능 시간이 아직 되지 않았습니다. (${formatKST(entryOpenAt)}부터 입장 가능)`,
+          error: `입장 가능 시간이 아직 되지 않았습니다.\n(${formatKST(entryOpenAt)}부터 입장 가능)`,
           remainingSeconds,
           entryOpenAt: entryOpenAt.toISOString(),
         },
