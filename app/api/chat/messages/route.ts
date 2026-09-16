@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/user-guard";
+import { getAdminSession } from "@/lib/auth/admin-guard";
 import { createServerClient } from "@/lib/supabase/server";
 import { getAnonAlias } from "@/lib/utils/anon";
 import type { ChatMessageView, ChatSendRequest } from "@/types/api";
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     const baseQuery = supabase
       .from("sapnow_chat_messages")
-      .select("id, registrant_id, message, created_at")
+      .select("id, registrant_id, message, created_at, is_admin")
       .eq("is_hidden", false);
 
     const messagesQuery = after
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
       message: row.message,
       createdAt: row.created_at,
       isMine: row.registrant_id === userOrResponse.registrantId,
+      isAdmin: row.is_admin,
     }));
 
     const hiddenRows = hiddenResult.data ?? [];
@@ -90,11 +92,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const admin = await getAdminSession();
+
     const supabase = createServerClient();
     const { data, error } = await supabase
       .from("sapnow_chat_messages")
-      .insert({ registrant_id: userOrResponse.registrantId, message })
-      .select("id, registrant_id, message, created_at")
+      .insert({
+        registrant_id: userOrResponse.registrantId,
+        message,
+        is_admin: !!admin,
+      })
+      .select("id, registrant_id, message, created_at, is_admin")
       .single();
 
     if (error) throw error;
@@ -105,6 +113,7 @@ export async function POST(request: NextRequest) {
       message: data.message,
       createdAt: data.created_at,
       isMine: true,
+      isAdmin: data.is_admin,
     };
 
     return NextResponse.json({ data: view });

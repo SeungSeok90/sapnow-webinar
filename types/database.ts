@@ -53,6 +53,7 @@ export interface ChatMessage {
   registrant_id: string;
   message: string;
   created_at: string;
+  is_admin: boolean;
 }
 
 export interface EventSettings {

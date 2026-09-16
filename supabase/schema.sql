@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS sapnow_chat_messages (
 
 ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ;
+ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
 
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_created    ON sapnow_chat_messages (created_at);
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_registrant ON sapnow_chat_messages (registrant_id);

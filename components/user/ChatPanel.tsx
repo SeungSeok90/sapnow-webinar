@@ -148,14 +148,21 @@ export default function ChatPanel() {
               key={m.id}
               className={`flex flex-col ${m.isMine ? "items-end" : "items-start"}`}
             >
-              <span className="mb-0.5 text-xs text-gray-500">
-                {m.alias} · {formatMessageTime(m.createdAt)}
+              <span className="mb-0.5 flex items-center gap-1 text-xs text-gray-500">
+                {m.isAdmin && (
+                  <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-gray-900">
+                    관리자
+                  </span>
+                )}
+                {m.isAdmin ? "운영진" : m.alias} · {formatMessageTime(m.createdAt)}
               </span>
               <div
                 className={`max-w-[85%] break-words rounded-2xl px-3 py-1.5 text-sm ${
-                  m.isMine
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-700 text-gray-100"
+                  m.isAdmin
+                    ? "border border-amber-400 bg-amber-500/20 text-amber-100"
+                    : m.isMine
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-700 text-gray-100"
                 }`}
               >
                 {renderMessageWithLinks(m.message)}

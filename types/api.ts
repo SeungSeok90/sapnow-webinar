@@ -76,6 +76,7 @@ export interface ChatMessageView {
   message: string;
   createdAt: string;
   isMine: boolean;
+  isAdmin: boolean;
 }
 
 export interface ChatSendRequest {
