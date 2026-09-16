@@ -12,6 +12,26 @@ function formatMessageTime(createdAt: string): string {
   return formatKSTTime(createdAt, { hour: "2-digit", minute: "2-digit" });
 }
 
+const URL_PATTERN = /(https?:\/\/[^\s]+)/g;
+
+function renderMessageWithLinks(message: string) {
+  return message.split(URL_PATTERN).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a
+        key={i}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline text-blue-300 hover:text-blue-200 break-all"
+      >
+        {part}
+      </a>
+    ) : (
+      part
+    )
+  );
+}
+
 export default function ChatPanel() {
   const [messages, setMessages] = useState<ChatMessageView[]>([]);
   const [input, setInput] = useState("");
@@ -138,7 +158,7 @@ export default function ChatPanel() {
                     : "bg-gray-700 text-gray-100"
                 }`}
               >
-                {m.message}
+                {renderMessageWithLinks(m.message)}
               </div>
             </div>
           ))
