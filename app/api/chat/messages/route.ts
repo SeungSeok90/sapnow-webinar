@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     const data: ChatMessageView[] = rows.map((row) => ({
       id: row.id,
-      alias: row.registrant_id ? getAnonAlias(row.registrant_id) : "운영진",
+      alias: row.registrant_id ? getAnonAlias(row.registrant_id) : "운영자",
       message: row.message,
       createdAt: row.created_at,
       isMine: row.registrant_id !== null && row.registrant_id === userOrResponse.registrantId,

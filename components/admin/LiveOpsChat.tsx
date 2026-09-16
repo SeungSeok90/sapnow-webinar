@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AdminChatMessageView } from "@/types/api";
 import { formatKSTTime } from "@/lib/utils/time";
+import { renderMessageWithLinks } from "@/lib/utils/chatText";
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_MESSAGE_LENGTH = 300;
@@ -122,7 +123,12 @@ export default function LiveOpsChat() {
                   m.isAdmin ? "bg-amber-500 text-gray-900" : "bg-gray-100 text-gray-800"
                 }`}
               >
-                {m.message}
+                {renderMessageWithLinks(
+                  m.message,
+                  m.isAdmin
+                    ? "underline text-blue-900 hover:text-blue-700 break-all"
+                    : "underline text-blue-600 hover:text-blue-500 break-all"
+                )}
               </div>
             </div>
           ))

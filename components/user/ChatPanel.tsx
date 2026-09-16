@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessageView } from "@/types/api";
 import { formatKSTTime } from "@/lib/utils/time";
+import { renderMessageWithLinks } from "@/lib/utils/chatText";
 
 const POLL_INTERVAL_MS = 4000;
 const MAX_MESSAGE_LENGTH = 300;
@@ -10,26 +11,6 @@ const NEAR_BOTTOM_THRESHOLD_PX = 80;
 
 function formatMessageTime(createdAt: string): string {
   return formatKSTTime(createdAt, { hour: "2-digit", minute: "2-digit" });
-}
-
-const URL_PATTERN = /(https?:\/\/[^\s]+)/g;
-
-function renderMessageWithLinks(message: string) {
-  return message.split(URL_PATTERN).map((part, i) =>
-    /^https?:\/\//.test(part) ? (
-      <a
-        key={i}
-        href={part}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="underline text-blue-300 hover:text-blue-200 break-all"
-      >
-        {part}
-      </a>
-    ) : (
-      part
-    )
-  );
 }
 
 export default function ChatPanel() {
@@ -148,13 +129,8 @@ export default function ChatPanel() {
               key={m.id}
               className={`flex flex-col ${m.isMine ? "items-end" : "items-start"}`}
             >
-              <span className="mb-0.5 flex items-center gap-1 text-xs text-gray-500">
-                {m.isAdmin && (
-                  <span className="rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-gray-900">
-                    관리자
-                  </span>
-                )}
-                {m.isAdmin ? "운영진" : m.alias} · {formatMessageTime(m.createdAt)}
+              <span className="mb-0.5 text-xs text-gray-500">
+                {m.isAdmin ? "운영자" : m.alias} · {formatMessageTime(m.createdAt)}
               </span>
               <div
                 className={`max-w-[85%] break-words rounded-2xl px-3 py-1.5 text-sm ${
@@ -165,7 +141,10 @@ export default function ChatPanel() {
                       : "bg-gray-700 text-gray-100"
                 }`}
               >
-                {renderMessageWithLinks(m.message)}
+                {renderMessageWithLinks(
+                  m.message,
+                  "underline text-blue-300 hover:text-blue-200 break-all"
+                )}
               </div>
             </div>
           ))
