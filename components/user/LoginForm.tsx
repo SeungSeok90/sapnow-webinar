@@ -118,12 +118,19 @@ export default function LoginForm({ entryOpenAt }: LoginFormProps) {
       {isBeforeEntry && entryOpenAt && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
           <p className="text-sm text-blue-700">
-            입장 가능 시간: {formatKST(entryOpenAt)}부터
-          </p>
-          <p className="text-xs text-blue-500 mt-0.5">
             {waitingRetry
               ? "곧 자동으로 입장을 시도합니다"
               : `남은 시간 ${formatRemaining(entryOpenMs! - nowTs)}`}
+          </p>
+          <p className="text-xs text-blue-500 mt-0.5">
+            입장 가능 시간:{" "}
+            {formatKST(entryOpenAt, {
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            부터
           </p>
         </div>
       )}
