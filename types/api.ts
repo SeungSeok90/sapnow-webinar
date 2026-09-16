@@ -85,13 +85,14 @@ export interface ChatSendRequest {
 
 export interface AdminChatMessageView {
   id: string;
-  registrantId: string;
+  registrantId: string | null;
   name: string;
   company: string;
   email: string;
   message: string;
   createdAt: string;
   isHidden: boolean;
+  isAdmin: boolean;
 }
 
 export interface PaginatedResponse<T> {

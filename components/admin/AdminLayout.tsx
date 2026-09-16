@@ -13,6 +13,7 @@ interface AdminLayoutProps {
 
 const navItems = [
   { href: "/admin/dashboard", label: "대시보드", roles: ["super_admin", "manager"] },
+  { href: "/admin/live", label: "라이브 운영", roles: ["super_admin", "manager"] },
   { href: "/admin/registrants", label: "등록자 관리", roles: ["super_admin", "manager"] },
   { href: "/admin/viewers", label: "시청 현황", roles: ["super_admin", "manager"] },
   { href: "/admin/chat", label: "채팅 관리", roles: ["super_admin", "manager"] },

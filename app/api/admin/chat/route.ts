@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const baseQuery = supabase
       .from("sapnow_chat_messages")
-      .select("id, registrant_id, message, created_at, is_hidden");
+      .select("id, registrant_id, admin_id, message, created_at, is_hidden, is_admin");
 
     const { data: messagesRaw, error: msgError } = after
       ? await baseQuery
@@ -31,21 +31,49 @@ export async function GET(request: NextRequest) {
 
     const rows = after ? (messagesRaw ?? []) : [...(messagesRaw ?? [])].reverse();
 
-    // registrants 별도 조회 후 Map으로 병합 (PostgREST 임베드 조인 대신)
-    const registrantIds = Array.from(new Set(rows.map((m) => m.registrant_id)));
-    const { data: registrants, error: regError } = registrantIds.length
-      ? await supabase
-          .from("registrants")
-          .select("id, name, company, email")
-          .in("id", registrantIds)
-      : { data: [], error: null };
+    // registrants/admin_users 별도 조회 후 Map으로 병합 (PostgREST 임베드 조인 대신)
+    const registrantIds = Array.from(
+      new Set(rows.map((m) => m.registrant_id).filter((id): id is string => !!id))
+    );
+    const adminIds = Array.from(
+      new Set(rows.map((m) => m.admin_id).filter((id): id is string => !!id))
+    );
+
+    const [{ data: registrants, error: regError }, { data: admins, error: adminError }] =
+      await Promise.all([
+        registrantIds.length
+          ? supabase.from("registrants").select("id, name, company, email").in("id", registrantIds)
+          : Promise.resolve({ data: [], error: null }),
+        adminIds.length
+          ? supabase.from("admin_users").select("id, name").in("id", adminIds)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
 
     if (regError) throw regError;
+    if (adminError) throw adminError;
 
     const registrantMap = new Map((registrants ?? []).map((r) => [r.id, r]));
+    const adminMap = new Map((admins ?? []).map((a) => [a.id, a]));
 
     const data: AdminChatMessageView[] = rows.map((row) => {
-      const registrant = registrantMap.get(row.registrant_id);
+      // 라이브 운영 페이지에서 admin_id로 직접 보낸 메시지 (registrant_id 없음)
+      if (row.admin_id) {
+        const admin = adminMap.get(row.admin_id);
+        return {
+          id: row.id,
+          registrantId: null,
+          name: admin?.name ? `관리자 · ${admin.name}` : "관리자",
+          company: "",
+          email: "",
+          message: row.message,
+          createdAt: row.created_at,
+          isHidden: row.is_hidden,
+          isAdmin: true,
+        };
+      }
+
+      // 등록자로 로그인한 상태에서 보낸 메시지 (관리자 세션이 함께 있으면 is_admin=true)
+      const registrant = row.registrant_id ? registrantMap.get(row.registrant_id) : undefined;
       return {
         id: row.id,
         registrantId: row.registrant_id,
@@ -55,6 +83,7 @@ export async function GET(request: NextRequest) {
         message: row.message,
         createdAt: row.created_at,
         isHidden: row.is_hidden,
+        isAdmin: row.is_admin,
       };
     });
 

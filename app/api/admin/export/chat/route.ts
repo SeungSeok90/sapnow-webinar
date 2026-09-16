@@ -13,25 +13,51 @@ export async function GET() {
 
     const { data: rows, error } = await supabase
       .from("sapnow_chat_messages")
-      .select("id, registrant_id, message, created_at, is_hidden")
+      .select("id, registrant_id, admin_id, message, created_at, is_hidden, is_admin")
       .order("created_at", { ascending: true });
 
     if (error) throw error;
 
-    const registrantIds = Array.from(new Set((rows ?? []).map((m) => m.registrant_id)));
-    const { data: registrants, error: regError } = registrantIds.length
-      ? await supabase
-          .from("registrants")
-          .select("id, name, company, email")
-          .in("id", registrantIds)
-      : { data: [], error: null };
+    const registrantIds = Array.from(
+      new Set((rows ?? []).map((m) => m.registrant_id).filter((id): id is string => !!id))
+    );
+    const adminIds = Array.from(
+      new Set((rows ?? []).map((m) => m.admin_id).filter((id): id is string => !!id))
+    );
+
+    const [{ data: registrants, error: regError }, { data: admins, error: adminError }] =
+      await Promise.all([
+        registrantIds.length
+          ? supabase.from("registrants").select("id, name, company, email").in("id", registrantIds)
+          : Promise.resolve({ data: [], error: null }),
+        adminIds.length
+          ? supabase.from("admin_users").select("id, name").in("id", adminIds)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
 
     if (regError) throw regError;
+    if (adminError) throw adminError;
 
     const registrantMap = new Map((registrants ?? []).map((r) => [r.id, r]));
+    const adminMap = new Map((admins ?? []).map((a) => [a.id, a]));
 
     const data: AdminChatMessageView[] = (rows ?? []).map((row) => {
-      const registrant = registrantMap.get(row.registrant_id);
+      if (row.admin_id) {
+        const admin = adminMap.get(row.admin_id);
+        return {
+          id: row.id,
+          registrantId: null,
+          name: admin?.name ? `관리자 · ${admin.name}` : "관리자",
+          company: "",
+          email: "",
+          message: row.message,
+          createdAt: row.created_at,
+          isHidden: row.is_hidden,
+          isAdmin: true,
+        };
+      }
+
+      const registrant = row.registrant_id ? registrantMap.get(row.registrant_id) : undefined;
       return {
         id: row.id,
         registrantId: row.registrant_id,
@@ -41,6 +67,7 @@ export async function GET() {
         message: row.message,
         createdAt: row.created_at,
         isHidden: row.is_hidden,
+        isAdmin: row.is_admin,
       };
     });
 

@@ -50,7 +50,8 @@ export interface AdminUser {
 
 export interface ChatMessage {
   id: string;
-  registrant_id: string;
+  registrant_id: string | null;
+  admin_id: string | null;
   message: string;
   created_at: string;
   is_admin: boolean;

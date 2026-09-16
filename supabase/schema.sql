@@ -129,7 +129,8 @@ ON CONFLICT (id) DO NOTHING;
 -- ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS sapnow_chat_messages (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  registrant_id UUID NOT NULL REFERENCES registrants (id) ON DELETE CASCADE,
+  registrant_id UUID REFERENCES registrants (id) ON DELETE CASCADE,
+  admin_id      UUID REFERENCES admin_users (id) ON DELETE SET NULL,
   message       TEXT NOT NULL,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   is_hidden     BOOLEAN NOT NULL DEFAULT false,
@@ -139,6 +140,16 @@ CREATE TABLE IF NOT EXISTS sapnow_chat_messages (
 ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ;
 ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE sapnow_chat_messages ADD COLUMN IF NOT EXISTS admin_id UUID REFERENCES admin_users (id) ON DELETE SET NULL;
+-- 관리자 라이브 운영 페이지에서 보낸 메시지는 registrant_id 없이 admin_id로만 저장되므로 NOT NULL 제약을 해제한다.
+ALTER TABLE sapnow_chat_messages ALTER COLUMN registrant_id DROP NOT NULL;
+
+ALTER TABLE sapnow_chat_messages DROP CONSTRAINT IF EXISTS chk_sapnow_chat_messages_sender;
+ALTER TABLE sapnow_chat_messages ADD CONSTRAINT chk_sapnow_chat_messages_sender
+  CHECK (
+    (registrant_id IS NOT NULL AND admin_id IS NULL) OR
+    (registrant_id IS NULL AND admin_id IS NOT NULL)
+  );
 
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_created    ON sapnow_chat_messages (created_at);
 CREATE INDEX IF NOT EXISTS idx_sapnow_chat_messages_registrant ON sapnow_chat_messages (registrant_id);
