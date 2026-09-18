@@ -21,38 +21,37 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") as ViewStatus | "all" | null;
 
     const supabase = createServerClient();
-    let query = supabase
+
+    // 등록자 전체 조회
+    let registrantsQuery = supabase
       .from("registrants")
-      .select(
-        `id, name, company, email, phone,
-         watch_logs(first_access_at, last_access_at, total_watch_seconds)`
-      )
-      .order("created_at", { ascending: false });
+      .select("id, name, company, email, phone")
+      .order("created_at", { ascending: false })
+      .limit(10000);
 
     if (search) {
-      query = query.or(
+      registrantsQuery = registrantsQuery.or(
         `name.ilike.%${search}%,company.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`
       );
     }
 
-    const { data, error } = await query;
-    if (error) throw error;
+    const { data: registrants, error: regError } = await registrantsQuery;
+    if (regError) throw regError;
 
-    type RawRow = {
-      id: string;
-      name: string;
-      company: string;
-      email: string;
-      phone: string;
-      watch_logs: {
-        first_access_at: string | null;
-        last_access_at: string | null;
-        total_watch_seconds: number;
-      }[] | null;
-    };
+    // watch_logs는 등록자와 1:1 관계라 PostgREST 임베드 시 배열이 아닌 객체로 내려오므로
+    // 시청현황 목록 API와 동일하게 별도 조회 후 Map으로 병합한다.
+    const { data: watchLogs, error: watchError } = await supabase
+      .from("watch_logs")
+      .select("registrant_id, first_access_at, last_access_at, total_watch_seconds")
+      .limit(10000);
+    if (watchError) throw watchError;
 
-    const rows: ViewerRow[] = (data as RawRow[] ?? []).map((r) => {
-      const log = r.watch_logs?.[0] ?? null;
+    const watchMap = new Map(
+      (watchLogs ?? []).map((w) => [w.registrant_id, w])
+    );
+
+    const rows: ViewerRow[] = (registrants ?? []).map((r) => {
+      const log = watchMap.get(r.id) ?? null;
       return {
         registrant_id: r.id,
         name: r.name,
